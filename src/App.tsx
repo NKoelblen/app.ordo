@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import { darkTheme, lightTheme } from './theme/theme';
+import '@mui/material/styles';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/700.css';
+import './App.css';
+import './styles/base/base.scss';
+import ThemeToggle from './components/ThemeToggle';
+import Sidebar from './components/Sidebar';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+	const [isDarkMode, setIsDarkMode] = useState(true); // Par défaut, mode sombre
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+	// Bascule entre les modes sombre et clair
+	const toggleTheme = () => {
+		setIsDarkMode((prevMode) => !prevMode);
+	};
 
-export default App
+	return (
+		<ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+			<CssBaseline />
+			<div className={isDarkMode ? 'dark-mode' : 'light-mode'}>
+				<Sidebar />
+				<ThemeToggle
+					toggleTheme={toggleTheme}
+					isDarkMode={isDarkMode}
+				/>
+				<h1>Bienvenue sur Ordo</h1>
+				<p>Ceci est le contenu principal de l'application.</p>
+			</div>
+		</ThemeProvider>
+	);
+};
+
+export default App;
