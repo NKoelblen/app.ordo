@@ -1,20 +1,22 @@
 import { useState } from 'react';
-import { Drawer, Menu, MenuItem, IconButton, Box } from '@mui/material';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { useSpaces } from '../contexts/SpaceContext';
+import { Drawer, Menu, MenuItem, ListItemIcon, ListItemText, IconButton, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import AddIcon from '@mui/icons-material/Add';
+import { useSpaces } from '../contexts/SpaceContext';
+import AddSpaceModal from './SpaceForm';
 import '../styles/components/Sidebar.scss';
 
 const Sidebar = () => {
-	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-	const open = Boolean(anchorEl);
+	const [anchorEls, setAnchorEls] = useState<{ [key: string]: HTMLElement | null }>({});
+	const [modalOpen, setModalOpen] = useState(false);
 
-	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-		setAnchorEl(event.currentTarget);
+	const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, menuId: string) => {
+		setAnchorEls((prev) => ({ ...prev, [menuId]: event.currentTarget }));
 	};
 
-	const handleClose = () => {
-		setAnchorEl(null);
+	const handleMenuClose = (menuId: string) => {
+		setAnchorEls((prev) => ({ ...prev, [menuId]: null }));
 	};
 
 	const { spaces } = useSpaces();
@@ -41,15 +43,15 @@ const Sidebar = () => {
 				<span>Espaces</span>
 
 				{/* Bouton du menu */}
-				<IconButton onClick={handleClick}>
+				<IconButton onClick={(e) => handleMenuOpen(e, 'mainMenu')}>
 					<MoreHorizIcon />
 				</IconButton>
 
 				{/* Menu déroulant */}
 				<Menu
-					anchorEl={anchorEl}
-					open={open}
-					onClose={handleClose}
+					anchorEl={anchorEls['mainMenu']}
+					open={Boolean(anchorEls['mainMenu'])}
+					onClose={() => handleMenuClose('mainMenu')}
 					anchorOrigin={{
 						vertical: 'top',
 						horizontal: 'right',
@@ -60,8 +62,18 @@ const Sidebar = () => {
 					}}
 					sx={{ mt: -0.75 }}
 				>
-					<MenuItem onClick={handleClose}>Item 1</MenuItem>
-					<MenuItem onClick={handleClose}>Item 2</MenuItem>
+					<MenuItem
+						onClick={() => {
+							setModalOpen(true); // Ouvre le modal
+							handleMenuClose('mainMenu'); // Ferme le menu
+						}}
+					>
+						<ListItemIcon>
+							<AddIcon />
+						</ListItemIcon>
+						<ListItemText>Ajouter un espace</ListItemText>
+					</MenuItem>
+					<MenuItem onClick={() => handleMenuClose('mainMenu')}>Item 2</MenuItem>
 				</Menu>
 			</Box>
 
@@ -73,15 +85,15 @@ const Sidebar = () => {
 					>
 						<span>{space.name}</span>
 						{/* Bouton du menu */}
-						<IconButton onClick={handleClick}>
+						<IconButton onClick={(e) => handleMenuOpen(e, `spaceMenu-${space.id}`)}>
 							<MoreHorizIcon />
 						</IconButton>
 
 						{/* Menu déroulant */}
 						<Menu
-							anchorEl={anchorEl}
-							open={open}
-							onClose={handleClose}
+							anchorEl={anchorEls[`spaceMenu-${space.id}`]}
+							open={Boolean(anchorEls[`spaceMenu-${space.id}`])}
+							onClose={() => handleMenuClose(`spaceMenu-${space.id}`)}
 							anchorOrigin={{
 								vertical: 'top',
 								horizontal: 'right',
@@ -92,12 +104,17 @@ const Sidebar = () => {
 							}}
 							sx={{ mt: -0.75 }}
 						>
-							<MenuItem onClick={handleClose}>Item 1</MenuItem>
-							<MenuItem onClick={handleClose}>Item 2</MenuItem>
+							<MenuItem onClick={() => handleMenuClose(`spaceMenu-${space.id}`)}>Item 1</MenuItem>
+							<MenuItem onClick={() => handleMenuClose(`spaceMenu-${space.id}`)}>Item 2</MenuItem>
 						</Menu>
 					</li>
 				))}
 			</ul>
+
+			<AddSpaceModal
+				open={modalOpen}
+				handleClose={() => setModalOpen(false)}
+			/>
 		</Drawer>
 	);
 };
