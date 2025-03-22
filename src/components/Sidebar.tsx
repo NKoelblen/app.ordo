@@ -1,29 +1,35 @@
 import { useState } from 'react';
 import { Drawer, Menu, MenuItem, ListItemIcon, ListItemText, IconButton, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import AddIcon from '@mui/icons-material/Add';
+import { MoreHoriz as MoreHorizIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useSpaces } from '../contexts/SpaceContext';
 import AddSpaceModal from './SpaceForm';
 import '../styles/components/Sidebar.scss';
 
 const Sidebar = () => {
-	const [anchorEls, setAnchorEls] = useState<{ [key: string]: HTMLElement | null }>({});
-	const [modalOpen, setModalOpen] = useState(false);
-
-	const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, menuId: string) => {
-		setAnchorEls((prev) => ({ ...prev, [menuId]: event.currentTarget }));
-	};
-
-	const handleMenuClose = (menuId: string) => {
-		setAnchorEls((prev) => ({ ...prev, [menuId]: null }));
-	};
-
-	const { spaces } = useSpaces();
+	const { spaces, deleteSpace } = useSpaces();
+	const [selectedSpace, setSelectedSpace] = useState<number | null>(null);
 
 	if (!Array.isArray(spaces)) {
 		return <div>Chargement...</div>;
 	}
+
+	const handleDelete = () => {
+		if (selectedSpace !== null) {
+			deleteSpace(String(selectedSpace));
+		}
+		handleMenuClose(`spaceMenu-${selectedSpace}`);
+	};
+
+	const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, menuId: string) => {
+		setAnchorEls((prev) => ({ ...prev, [menuId]: event.currentTarget }));
+	};
+	const handleMenuClose = (menuId: string) => {
+		setAnchorEls((prev) => ({ ...prev, [menuId]: null }));
+	};
+
+	const [anchorEls, setAnchorEls] = useState<{ [key: string]: HTMLElement | null }>({});
+	const [modalOpen, setModalOpen] = useState(false);
 
 	return (
 		<Drawer
@@ -85,7 +91,12 @@ const Sidebar = () => {
 					>
 						<span>{space.name}</span>
 						{/* Bouton du menu */}
-						<IconButton onClick={(e) => handleMenuOpen(e, `spaceMenu-${space.id}`)}>
+						<IconButton
+							onClick={(e) => {
+								handleMenuOpen(e, `spaceMenu-${space.id}`);
+								setSelectedSpace(space.id);
+							}}
+						>
 							<MoreHorizIcon />
 						</IconButton>
 
@@ -104,7 +115,10 @@ const Sidebar = () => {
 							}}
 							sx={{ mt: -0.75 }}
 						>
-							<MenuItem onClick={() => handleMenuClose(`spaceMenu-${space.id}`)}>Item 1</MenuItem>
+							<MenuItem onClick={handleDelete}>
+								<DeleteIcon />
+								Supprimer
+							</MenuItem>
 							<MenuItem onClick={() => handleMenuClose(`spaceMenu-${space.id}`)}>Item 2</MenuItem>
 						</Menu>
 					</li>

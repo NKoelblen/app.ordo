@@ -1,8 +1,10 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
+import graphqlClient from '../utils/graphqlClient';
+import { gql } from 'graphql-request';
 
 // Définition du type Space
 export interface Space {
-	id: number;
+	id: string;
 	name: string;
 	status: 'open' | 'archived';
 	professional: boolean;
@@ -12,7 +14,8 @@ export interface Space {
 // Type du contexte
 interface SpaceContextType {
 	spaces: Space[];
-	addSpace: (newSpace: Omit<Space, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+	addSpace: (newSpace: Omit<Space, 'id'>) => Promise<void>;
+	deleteSpace: (id: string) => Promise<void>;
 }
 
 // Création du contexte
@@ -22,42 +25,85 @@ const SpaceContext = createContext<SpaceContextType | undefined>(undefined);
 export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [spaces, setSpaces] = useState<Space[]>([]);
 
-	// Récupérer les espaces depuis l'API
+	// Récupérer les espaces
+	const GET_SPACES = gql`
+		query {
+			spaces {
+				edges {
+					node {
+						id
+						name
+						professional
+						status
+					}
+				}
+			}
+		}
+	`;
 	useEffect(() => {
-		fetch('http://localhost/api/spaces')
-			.then((res) => res.json())
-			.then((data) => {
-				setSpaces(data.member);
-			})
-			.catch((error) => {
+		const fetchSpaces = async () => {
+			try {
+				const data = await graphqlClient.request<{ spaces: { edges: { node: Space }[] } }>(GET_SPACES);
+				const spaces = data.spaces.edges.map((edge) => edge.node);
+				setSpaces(spaces);
+			} catch (error) {
 				console.error('Erreur lors de la récupération des espaces:', error);
-			});
+			}
+		};
+
+		fetchSpaces();
 	}, []);
 
-	const addSpace = async (newSpace: Omit<Space, 'id' | 'createdAt' | 'updatedAt'>) => {
-		try {
-			const response = await fetch('http://localhost/api/spaces', {
-				method: 'POST',
-				headers: {
-					Accept: 'application/ld+json',
-					'Content-Type': 'application/ld+json',
-				},
-				body: JSON.stringify(newSpace),
-			});
-
-			const responseData = await response.json();
-
-			if (!response.ok) {
-				throw new Error(responseData.message);
+	// Ajouter un espace
+	const ADD_SPACE = gql`
+		mutation CreateSpace($name: String!, $status: String!, $professional: Boolean!, $parent: String) {
+			createSpace(input: { name: $name, status: $status, professional: $professional, parent: $parent }) {
+				space {
+					id
+					name
+					parent {
+						id
+					}
+				}
 			}
-
-			setSpaces((prevSpaces) => [...prevSpaces, responseData]);
+		}
+	`;
+	const addSpace = async (newSpace: Omit<Space, 'id'>) => {
+		try {
+			const variables = {
+				name: newSpace.name,
+				status: newSpace.status,
+				professional: newSpace.professional,
+				parent: newSpace.parent,
+			};
+			const data = await graphqlClient.request<{ createSpace: { space: Space } }>(ADD_SPACE, variables);
+			setSpaces((prevSpaces) => [...prevSpaces, data.createSpace.space]);
 		} catch (error: any) {
 			alert(`Erreur : ${error.message}`);
 		}
 	};
 
-	return <SpaceContext.Provider value={{ spaces, addSpace }}>{children}</SpaceContext.Provider>;
+	// Supprimer un espace
+	const DELETE_SPACE = gql`
+		mutation DeleteSpace($id: ID!) {
+			deleteSpace(input: { id: $id }) {
+				space {
+					id
+				}
+			}
+		}
+	`;
+	const deleteSpace = async (spaceId: string) => {
+		try {
+			const variables = { id: spaceId };
+			await graphqlClient.request(DELETE_SPACE, variables);
+			setSpaces((prevSpaces) => prevSpaces.filter((space) => space.id !== spaceId));
+		} catch (error) {
+			console.error('Erreur:', error);
+		}
+	};
+
+	return <SpaceContext.Provider value={{ spaces, addSpace, deleteSpace }}>{children}</SpaceContext.Provider>;
 };
 
 // Hook personnalisé pour utiliser le contexte
