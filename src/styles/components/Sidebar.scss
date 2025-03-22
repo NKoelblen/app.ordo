@@ -11,7 +11,7 @@
 	&-title {
 		font-size: 2rem;
 		font-weight: bold;
-		padding: 2rem 1rem 1rem;
+		padding: 2rem 1rem 1rem 2rem;
 		display: block;
 		text-align: center;
 		border-bottom: 1px solid var(--border-color);
@@ -20,5 +20,17 @@
 	&-link {
 		text-decoration: none;
 		color: inherit;
+	}
+
+	.nav-item {
+		display: flex;
+		justify-content: space-between;
+		padding-left: 2rem;
+		padding-right: 0.5rem;
+	}
+	.nav-title {
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		padding-top: 0.5rem;
 	}
 }
