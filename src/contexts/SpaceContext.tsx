@@ -9,6 +9,7 @@ export interface Space {
 	status: 'open' | 'archived';
 	professional: boolean;
 	parent?: number | null;
+	children?: { edges: { node: Space }[] };
 }
 
 // Type du contexte
@@ -27,26 +28,43 @@ const SpaceContext = createContext<SpaceContextType | undefined>(undefined);
 export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [spaces, setSpaces] = useState<Space[]>([]);
 
-	// Récupérer les espaces
-	const GET_SPACES = gql`
-		query {
-			spaces {
+	const SPACE_FIELDS = gql`
+		fragment SpaceFields on Space {
+			id
+			name
+			professional
+			status
+			parent {
+				id
+				name
+				professional
+				status
+			}
+			children {
 				edges {
 					node {
 						id
 						name
 						professional
 						status
-						parent {
-							id
-							name
-							professional
-							status
-						}
 					}
 				}
 			}
 		}
+	`;
+
+	// Récupérer les espaces
+	const GET_SPACES = gql`
+		query {
+			spaces {
+				edges {
+					node {
+						...SpaceFields
+					}
+				}
+			}
+		}
+		${SPACE_FIELDS}
 	`;
 	useEffect(() => {
 		const fetchSpaces = async () => {
@@ -67,20 +85,13 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 		mutation CreateSpace($name: String!, $status: String!, $professional: Boolean!, $parent: String) {
 			createSpace(input: { name: $name, status: $status, professional: $professional, parent: $parent }) {
 				space {
-					id
-					name
-					professional
-					status
-					parent {
-						id
-						name
-						professional
-						status
-					}
+					...SpaceFields
 				}
 			}
 		}
+		${SPACE_FIELDS}
 	`;
+
 	const addSpace = async (newSpace: Omit<Space, 'id'>) => {
 		try {
 			const variables = {
@@ -103,14 +114,6 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 				space {
 					id
 					name
-					professional
-					status
-					parent {
-						id
-						name
-						professional
-						status
-					}
 				}
 			}
 		}
@@ -134,14 +137,16 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 			updateSpace(input: { id: $id, professional: $professional }) {
 				space {
 					id
-					name
 					professional
-					status
-					parent {
-						id
-						name
-						professional
-						status
+					children {
+						edges {
+							node {
+								id
+								name
+								professional
+								status
+							}
+						}
 					}
 				}
 			}
@@ -154,7 +159,44 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 				professional: spaceProfessional,
 			};
 			const data = await graphqlClient.request<{ updateSpace: { space: Space } }>(UPDATE_SPACE_PROFESSIONAL, variables);
-			setSpaces((prevSpaces) => prevSpaces.map((space) => (space.id === data.updateSpace.space.id ? data.updateSpace.space : space)));
+
+			// Fonction pour récupérer tous les descendants d'un espace
+			const getDescendants = (space: Space, allSpaces: Space[]): Space[] => {
+				let descendants: Space[] = [];
+
+				// Parcourt les enfants de l'espace actuel
+				space.children?.edges.forEach((child) => {
+					// Ajoute l'enfant actuel à la liste des descendants
+					descendants.push(child.node);
+
+					// Recherche l'espace correspondant dans la liste globale
+					const matchingSpace = allSpaces.find((s) => s.id === child.node.id);
+
+					// Si un espace correspondant est trouvé, récupère récursivement ses descendants
+					if (matchingSpace) {
+						descendants = descendants.concat(getDescendants(matchingSpace, allSpaces));
+					}
+				});
+
+				return descendants;
+			};
+
+			// Récupère tous les descendants de l'espace mis à jour
+			const descendants = getDescendants(data.updateSpace.space, spaces);
+
+			// Met à jour l'état global
+			setSpaces((prevSpaces) =>
+				prevSpaces.map((space) => {
+					// Met à jour l'espace cible ou ses descendants
+					if (space.id === spaceId || descendants.some((descendant) => descendant.id === space.id)) {
+						return {
+							...space,
+							professional: spaceProfessional,
+						};
+					}
+					return space;
+				})
+			);
 		} catch (error: any) {
 			console.log(`Erreur : ${error.message}`);
 		}
