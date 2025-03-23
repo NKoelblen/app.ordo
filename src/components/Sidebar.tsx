@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Drawer, Menu, MenuItem, ListItemIcon, ListItemText, IconButton, Box, TextField } from '@mui/material';
+import { Drawer, Menu, MenuItem, ListItemIcon, ListItemText, IconButton, Box, TextField, Checkbox, FormControlLabel } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { MoreHoriz as MoreHorizIcon, Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import { useSpaces } from '../contexts/SpaceContext';
@@ -7,7 +7,7 @@ import AddSpaceModal from './SpaceForm';
 import '../styles/components/Sidebar.scss';
 
 const Sidebar = () => {
-	const { spaces, deleteSpace, updateSpaceName } = useSpaces();
+	const { spaces, deleteSpace, updateSpaceName, updateSpaceProfessional } = useSpaces();
 	const [selectedSpace, setSelectedSpace] = useState<string | null>(null);
 
 	const [isEditingSpace, setIsEditingSpace] = useState<{ [key: string]: boolean }>({});
@@ -28,6 +28,11 @@ const Sidebar = () => {
 		if (event.key === 'Enter') {
 			handleUpdateSpaceName(String(selectedSpace));
 		}
+	};
+
+	const handleUpdateSpaceProfessional = (spaceId: string, isProfessional: boolean) => {
+		// Implémentez la logique pour mettre à jour la propriété "professional"
+		updateSpaceProfessional(spaceId, isProfessional);
 	};
 
 	const handleDelete = () => {
@@ -158,6 +163,18 @@ const Sidebar = () => {
 									<EditIcon />
 								</ListItemIcon>
 								<ListItemText>Renommer</ListItemText>
+							</MenuItem>
+							<MenuItem>
+								<FormControlLabel
+									control={
+										<Checkbox
+											checked={space.professional}
+											onChange={() => handleUpdateSpaceProfessional(space.id, !space.professional)}
+											disabled={space.parent !== null}
+										/>
+									}
+									label="Professionnel"
+								/>
 							</MenuItem>
 							<MenuItem onClick={handleDelete}>
 								<ListItemIcon>
