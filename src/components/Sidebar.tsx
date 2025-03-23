@@ -1,13 +1,23 @@
-import { useState } from 'react';
-import { Drawer, Menu, MenuItem, ListItemIcon, ListItemText, IconButton, Box, TextField, Checkbox, FormControlLabel } from '@mui/material';
+import React, { useState } from 'react';
+import { Drawer, Menu, MenuItem, ListItemIcon, ListItemText, IconButton, Box, TextField, Checkbox, FormControlLabel, List, ListItem, Collapse, Divider } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { MoreHoriz as MoreHorizIcon, Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, Archive as ArchiveIcon, Unarchive as UnarchiveIcon } from '@mui/icons-material';
+import {
+	MoreHoriz as MoreHorizIcon,
+	Add as AddIcon,
+	Delete as DeleteIcon,
+	Edit as EditIcon,
+	Archive as ArchiveIcon,
+	Unarchive as UnarchiveIcon,
+	ExpandMore as ExpandMoreIcon,
+	ChevronRight as ChevronRightIcon,
+} from '@mui/icons-material';
 import { useSpaces, Space } from '../contexts/SpaceContext';
 import AddSpaceModal from './SpaceForm';
 import '../styles/components/Sidebar.scss';
 
 const Sidebar = () => {
 	const { spaces, updateSpaceName, updateSpaceProfessional, updateSpaceStatus, deleteSpace, setStatusFilter } = useSpaces();
+	const [expandedSpaces, setExpandedSpaces] = useState<Set<string>>(new Set());
 	const [showArchivedSpaces, setShowrchivedSpaces] = useState(false);
 	const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
 
@@ -44,15 +54,22 @@ const Sidebar = () => {
 		return rootSpaces;
 	};
 
-	const renderSpaces = (spaces: (Space & { children: Space[] })[]) => {
+	const renderSpaces = (spaces: (Space & { children: Space[] })[], level: number = 2) => {
 		return (
-			<ul>
+			<List>
 				{spaces.map((space) => (
-					<li
-						key={space.id}
-						className="nav-item"
-					>
-						<Box className="nav-summary">
+					<React.Fragment key={space.id}>
+						<ListItem className="nav-item">
+							{space.children.length > 0 && (
+								<IconButton
+									className="expand-icon"
+									size="small"
+									onClick={() => toggleExpandSpace(space.id)}
+								>
+									{expandedSpaces.has(space.id) ? <ExpandMoreIcon fontSize="inherit" /> : <ChevronRightIcon fontSize="inherit" />}
+								</IconButton>
+							)}
+
 							{isEditingSpace[space.id] ? (
 								<TextField
 									inputRef={(el) => {
@@ -66,21 +83,34 @@ const Sidebar = () => {
 									fullWidth
 								/>
 							) : (
-								<Box>
+								<Box className="nav-item-summary">
 									<span>{space.name}</span>
 									{space.status === 'archived' && <ArchiveIcon />}
 								</Box>
 							)}
-							{/* Bouton du menu */}
-							<IconButton onClick={(e) => handleMenuOpen(e, space.status === 'archived' ? 'archivedSpaceMenu' : 'spaceMenu', space)}>
-								<MoreHorizIcon />
+
+							<IconButton
+								size="small"
+								className="menu-icon"
+								onClick={(e) => handleMenuOpen(e, space.status === 'archived' ? 'archivedSpaceMenu' : 'spaceMenu', space)}
+							>
+								<MoreHorizIcon fontSize="inherit" />
 							</IconButton>
-						</Box>
-						{/* Appel récursif pour afficher les enfants */}
-						{space.children.length > 0 && renderSpaces(space.children)}
-					</li>
+						</ListItem>
+
+						{space.children.length > 0 && (
+							<Collapse
+								in={expandedSpaces.has(space.id)}
+								timeout="auto"
+								unmountOnExit
+								style={{ paddingLeft: `${level * 0.5}rem` }}
+							>
+								{renderSpaces(space.children, level + 1)}
+							</Collapse>
+						)}
+					</React.Fragment>
 				))}
-			</ul>
+			</List>
 		);
 	};
 
@@ -116,6 +146,18 @@ const Sidebar = () => {
 		handleMenuClose();
 	};
 
+	const toggleExpandSpace = (spaceId: string) => {
+		setExpandedSpaces((prev) => {
+			const newExpandedSpaces = new Set(prev);
+			if (newExpandedSpaces.has(spaceId)) {
+				newExpandedSpaces.delete(spaceId);
+			} else {
+				newExpandedSpaces.add(spaceId);
+			}
+			return newExpandedSpaces;
+		});
+	};
+
 	const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
 	const [menuType, setMenuType] = useState<string | null>(null);
 	const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, type: string, space?: Space) => {
@@ -145,11 +187,15 @@ const Sidebar = () => {
 				Ordo
 			</Link>
 
-			<Box className="nav-summary nav-title">
+			<Box className="nav-item nav-title">
 				<span>Espaces</span>
 
-				<IconButton onClick={(e) => handleMenuOpen(e, 'spacesMenu')}>
-					<MoreHorizIcon />
+				<IconButton
+					className="menu-icon"
+					size="small"
+					onClick={(e) => handleMenuOpen(e, 'spacesMenu')}
+				>
+					<MoreHorizIcon fontSize="inherit" />
 				</IconButton>
 			</Box>
 
@@ -157,6 +203,7 @@ const Sidebar = () => {
 
 			{/* Menu */}
 			<Menu
+				className="menu"
 				anchorEl={menuAnchorEl}
 				open={Boolean(menuAnchorEl)}
 				onClose={handleMenuClose}
@@ -213,10 +260,14 @@ const Sidebar = () => {
 							</ListItemIcon>
 							<ListItemText>Renommer</ListItemText>
 						</MenuItem>,
-						<MenuItem key={`update-space-professional-${selectedSpace.id}`}>
+						<MenuItem
+							className="menu-item-checkbox"
+							key={`update-space-professional-${selectedSpace.id}`}
+						>
 							<FormControlLabel
 								control={
 									<Checkbox
+										className="menu-item-checkbox-input"
 										checked={selectedSpace?.professional || false}
 										onChange={(event, checked) => {
 											if (selectedSpace) {
@@ -229,6 +280,7 @@ const Sidebar = () => {
 								label="Professionnel"
 							/>
 						</MenuItem>,
+						<Divider />,
 						<MenuItem
 							key={`archive-space-${selectedSpace.id}`}
 							onClick={() => {
