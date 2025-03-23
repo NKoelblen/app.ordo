@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { Drawer, Menu, MenuItem, ListItemIcon, ListItemText, IconButton, Box, TextField, Checkbox, FormControlLabel } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { MoreHoriz as MoreHorizIcon, Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
-import { useSpaces } from '../contexts/SpaceContext';
+import { useSpaces, Space } from '../contexts/SpaceContext';
 import AddSpaceModal from './SpaceForm';
 import '../styles/components/Sidebar.scss';
 
 const Sidebar = () => {
 	const { spaces, deleteSpace, updateSpaceName, updateSpaceProfessional } = useSpaces();
-	const [selectedSpace, setSelectedSpace] = useState<string | null>(null);
+	const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
 
 	const [isEditingSpace, setIsEditingSpace] = useState<{ [key: string]: boolean }>({});
 	const [currentSpaceName, setCurrentSpaceName] = useState<string>('');
@@ -24,30 +24,34 @@ const Sidebar = () => {
 			setIsEditingSpace((prev) => ({ ...prev, [spaceId]: false }));
 		}
 	};
-	const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+	const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>, spaceId: string) => {
 		if (event.key === 'Enter') {
-			handleUpdateSpaceName(String(selectedSpace));
+			handleUpdateSpaceName(spaceId);
 		}
 	};
 
 	const handleUpdateSpaceProfessional = (spaceId: string, isProfessional: boolean) => {
-		// Implémentez la logique pour mettre à jour la propriété "professional"
 		updateSpaceProfessional(spaceId, isProfessional);
+		handleMenuClose();
 	};
 
-	const handleDelete = () => {
-		if (selectedSpace !== null) {
-			deleteSpace(String(selectedSpace));
+	const handleDeleteSpace = (spaceId: string) => {
+		deleteSpace(spaceId);
+		handleMenuClose();
+	};
+
+	const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
+	const [menuType, setMenuType] = useState<string | null>(null);
+	const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, type: string, space?: Space) => {
+		setMenuAnchorEl(event.currentTarget);
+		setMenuType(type);
+		if (space) {
+			setSelectedSpace(space);
 		}
-		handleMenuClose(`spaceMenu-${selectedSpace}`);
 	};
-
-	const [anchorEls, setAnchorEls] = useState<{ [key: string]: HTMLElement | null }>({});
-	const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, menuId: string) => {
-		setAnchorEls((prev) => ({ ...prev, [menuId]: event.currentTarget }));
-	};
-	const handleMenuClose = (menuId: string) => {
-		setAnchorEls((prev) => ({ ...prev, [menuId]: null }));
+	const handleMenuClose = () => {
+		setMenuAnchorEl(null);
+		setSelectedSpace(null);
 	};
 
 	const [modalOpen, setModalOpen] = useState(false);
@@ -70,38 +74,9 @@ const Sidebar = () => {
 				<span>Espaces</span>
 
 				{/* Bouton du menu */}
-				<IconButton onClick={(e) => handleMenuOpen(e, 'mainMenu')}>
+				<IconButton onClick={(e) => handleMenuOpen(e, 'spacesMenu')}>
 					<MoreHorizIcon />
 				</IconButton>
-
-				{/* Menu déroulant */}
-				<Menu
-					anchorEl={anchorEls['mainMenu']}
-					open={Boolean(anchorEls['mainMenu'])}
-					onClose={() => handleMenuClose('mainMenu')}
-					anchorOrigin={{
-						vertical: 'top',
-						horizontal: 'right',
-					}}
-					transformOrigin={{
-						vertical: 'top',
-						horizontal: 'left',
-					}}
-					sx={{ mt: -0.75 }}
-				>
-					<MenuItem
-						onClick={() => {
-							setModalOpen(true); // Ouvre le modal
-							handleMenuClose('mainMenu'); // Ferme le menu
-						}}
-					>
-						<ListItemIcon>
-							<AddIcon />
-						</ListItemIcon>
-						<ListItemText>Ajouter un espace</ListItemText>
-					</MenuItem>
-					<MenuItem onClick={() => handleMenuClose('mainMenu')}>Item 2</MenuItem>
-				</Menu>
 			</Box>
 
 			<ul>
@@ -119,73 +94,94 @@ const Sidebar = () => {
 								}}
 								value={newSpaceName}
 								onChange={(event) => setNewSpaceName(event.target.value)}
-								// onBlur={() => handleUpdateSpaceName(String(selectedSpace))}
-								onKeyDown={handleKeyDown}
+								onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => handleKeyDown(event, space.id)}
 								fullWidth
 							/>
 						) : (
-							<span>{space.name}</span> // Afficher le nom actuel de l'espace
+							<span>{space.name}</span>
 						)}
 						{/* Bouton du menu */}
-						<IconButton
-							onClick={(e) => {
-								handleMenuOpen(e, `spaceMenu-${space.id}`);
-								setSelectedSpace(space.id);
-							}}
-						>
+						<IconButton onClick={(e) => handleMenuOpen(e, 'spaceMenu', space)}>
 							<MoreHorizIcon />
 						</IconButton>
-
-						{/* Menu déroulant */}
-						<Menu
-							anchorEl={anchorEls[`spaceMenu-${space.id}`]}
-							open={Boolean(anchorEls[`spaceMenu-${space.id}`])}
-							onClose={() => handleMenuClose(`spaceMenu-${space.id}`)}
-							anchorOrigin={{
-								vertical: 'top',
-								horizontal: 'right',
-							}}
-							transformOrigin={{
-								vertical: 'top',
-								horizontal: 'left',
-							}}
-							sx={{ mt: -0.75 }}
-						>
-							<MenuItem
-								onClick={() => {
-									setIsEditingSpace((prev) => ({ ...prev, [space.id]: true }));
-									setCurrentSpaceName(space.name);
-									setNewSpaceName(space.name);
-									handleMenuClose(`spaceMenu-${space.id}`);
-								}}
-							>
-								<ListItemIcon>
-									<EditIcon />
-								</ListItemIcon>
-								<ListItemText>Renommer</ListItemText>
-							</MenuItem>
-							<MenuItem>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={space.professional}
-											onChange={() => handleUpdateSpaceProfessional(space.id, !space.professional)}
-											disabled={space.parent !== null}
-										/>
-									}
-									label="Professionnel"
-								/>
-							</MenuItem>
-							<MenuItem onClick={handleDelete}>
-								<ListItemIcon>
-									<DeleteIcon />
-								</ListItemIcon>
-								<ListItemText>Supprimer</ListItemText>
-							</MenuItem>
-						</Menu>
 					</li>
 				))}
 			</ul>
+
+			{/* Menu */}
+			<Menu
+				anchorEl={menuAnchorEl}
+				open={Boolean(menuAnchorEl)}
+				onClose={handleMenuClose}
+				anchorOrigin={{
+					vertical: 'top',
+					horizontal: 'right',
+				}}
+				transformOrigin={{
+					vertical: 'top',
+					horizontal: 'left',
+				}}
+				sx={{ mt: -0.75 }}
+			>
+				{menuType === 'spacesMenu' && [
+					<MenuItem
+						key="add-space"
+						onClick={() => {
+							setModalOpen(true);
+							handleMenuClose();
+						}}
+					>
+						<ListItemIcon>
+							<AddIcon />
+						</ListItemIcon>
+						<ListItemText>Ajouter un espace</ListItemText>
+					</MenuItem>,
+				]}
+				{menuType === 'spaceMenu' &&
+					selectedSpace && [
+						<MenuItem
+							key={`rename-space-${selectedSpace.id}`}
+							onClick={() => {
+								if (selectedSpace) {
+									setIsEditingSpace((prev) => ({ ...prev, [selectedSpace.id]: true }));
+									setCurrentSpaceName(selectedSpace.name);
+									setNewSpaceName(selectedSpace.name);
+								}
+								handleMenuClose();
+							}}
+						>
+							<ListItemIcon>
+								<EditIcon />
+							</ListItemIcon>
+							<ListItemText>Renommer</ListItemText>
+						</MenuItem>,
+						<MenuItem key={`update-space-professional-${selectedSpace.id}`}>
+							<FormControlLabel
+								control={
+									<Checkbox
+										checked={selectedSpace?.professional || false}
+										onChange={(event, checked) => {
+											if (selectedSpace) {
+												handleUpdateSpaceProfessional(selectedSpace.id, checked);
+											}
+										}}
+										disabled={selectedSpace?.parent !== null}
+									/>
+								}
+								label="Professionnel"
+							/>
+						</MenuItem>,
+						<MenuItem
+							key={`delete-space-${selectedSpace.id}`}
+							onClick={() => handleDeleteSpace(selectedSpace.id)}
+						>
+							<ListItemIcon>
+								<DeleteIcon />
+							</ListItemIcon>
+							<ListItemText>Supprimer</ListItemText>
+						</MenuItem>,
+					]}
+			</Menu>
 
 			<AddSpaceModal
 				open={modalOpen}
