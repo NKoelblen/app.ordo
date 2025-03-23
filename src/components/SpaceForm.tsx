@@ -14,12 +14,15 @@ const modalStyle = {
 	borderRadius: '8px',
 };
 
+import { Space } from '../contexts/SpaceContext'; // Adjust the import path based on your project structure
+
 interface AddSpaceModalProps {
 	open: boolean;
 	handleClose: () => void;
+	parentSpace?: Space | null;
 }
 
-const AddSpaceModal = ({ open, handleClose }: AddSpaceModalProps) => {
+const AddSpaceModal = ({ open, handleClose, parentSpace }: AddSpaceModalProps) => {
 	const { addSpace } = useSpaces();
 	const [name, setName] = useState('');
 	const [professional, setProfessional] = useState(false);
@@ -30,7 +33,7 @@ const AddSpaceModal = ({ open, handleClose }: AddSpaceModalProps) => {
 			name,
 			status: 'open',
 			professional,
-			parent: null,
+			parent: parentSpace ? parentSpace.id : null,
 		});
 		setName('');
 		setProfessional(false);
@@ -52,7 +55,7 @@ const AddSpaceModal = ({ open, handleClose }: AddSpaceModalProps) => {
 						component="h2"
 						gutterBottom
 					>
-						Ajouter un espace
+						{parentSpace ? `Ajouter un sous-espace à ${parentSpace.name}` : 'Ajouter un espace'}
 					</Typography>
 					<form onSubmit={handleSubmit}>
 						<TextField
@@ -66,8 +69,9 @@ const AddSpaceModal = ({ open, handleClose }: AddSpaceModalProps) => {
 						<FormControlLabel
 							control={
 								<Checkbox
-									checked={professional}
+									checked={parentSpace ? parentSpace.professional : professional}
 									onChange={(e) => setProfessional(e.target.checked)}
+									disabled={!!parentSpace}
 								/>
 							}
 							label="Professionnel"
