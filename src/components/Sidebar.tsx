@@ -7,7 +7,8 @@ import AddSpaceModal from './SpaceForm';
 import '../styles/components/Sidebar.scss';
 
 const Sidebar = () => {
-	const { spaces, updateSpaceName, updateSpaceProfessional, updateSpaceStatus, deleteSpace } = useSpaces();
+	const { spaces, updateSpaceName, updateSpaceProfessional, updateSpaceStatus, deleteSpace, setStatusFilter } = useSpaces();
+	const [showArchivedSpaces, setShowrchivedSpaces] = useState(false);
 	const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
 
 	const [isEditingSpace, setIsEditingSpace] = useState<{ [key: string]: boolean }>({});
@@ -17,6 +18,11 @@ const Sidebar = () => {
 	if (!Array.isArray(spaces)) {
 		return <div>Chargement...</div>;
 	}
+
+	const handleShowArchivedSpaces = () => {
+		setShowrchivedSpaces((prev) => !prev);
+		setStatusFilter((prev) => (prev === 'open' ? null : 'open'));
+	};
 
 	const handleUpdateSpaceName = (spaceId: string) => {
 		if (newSpaceName !== currentSpaceName) {
@@ -141,6 +147,17 @@ const Sidebar = () => {
 							<AddIcon />
 						</ListItemIcon>
 						<ListItemText>Ajouter un espace</ListItemText>
+					</MenuItem>,
+					<MenuItem
+						key="show-archived-spaces"
+						onClick={() => {
+							handleShowArchivedSpaces();
+						}}
+					>
+						<ListItemIcon>
+							<ArchiveIcon />
+						</ListItemIcon>
+						<ListItemText>{showArchivedSpaces ? 'Masquer' : 'Afficher '} les espaces archivés</ListItemText>
 					</MenuItem>,
 				]}
 				{menuType === 'spaceMenu' &&
