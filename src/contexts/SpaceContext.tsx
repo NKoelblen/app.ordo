@@ -1,5 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-import graphqlClient from '../utils/graphqlClient';
+import graphqlClient from '../services/graphqlClient';
 import { gql } from 'graphql-request';
 
 // Définition du type Space
@@ -8,8 +8,7 @@ export interface Space {
 	name: string;
 	status: 'open' | 'archived';
 	professional: boolean;
-	parent?: number | null;
-	children?: { edges: { node: Space }[] };
+	parent?: Space | null;
 }
 
 // Type du contexte
@@ -42,16 +41,6 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 				name
 				professional
 				status
-			}
-			children {
-				edges {
-					node {
-						id
-						name
-						professional
-						status
-					}
-				}
 			}
 		}
 	`;
@@ -142,16 +131,6 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 				space {
 					id
 					professional
-					children {
-						edges {
-							node {
-								id
-								name
-								professional
-								status
-							}
-						}
-					}
 				}
 			}
 		}
@@ -249,17 +228,10 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 	const getDescendants = (space: Space, allSpaces: Space[]): Space[] => {
 		let descendants: Space[] = [];
 
-		// Parcourt les enfants de l'espace actuel
-		space.children?.edges.forEach((child) => {
-			// Ajoute l'enfant actuel à la liste des descendants
-			descendants.push(child.node);
-
-			// Recherche l'espace correspondant dans la liste globale
-			const matchingSpace = allSpaces.find((s) => s.id === child.node.id);
-
-			// Si un espace correspondant est trouvé, récupère récursivement ses descendants
-			if (matchingSpace) {
-				descendants = descendants.concat(getDescendants(matchingSpace, allSpaces));
+		allSpaces.forEach((currentSpace) => {
+			if (currentSpace.parent?.id === space.id) {
+				descendants.push(currentSpace);
+				descendants = descendants.concat(getDescendants(currentSpace, allSpaces));
 			}
 		});
 
