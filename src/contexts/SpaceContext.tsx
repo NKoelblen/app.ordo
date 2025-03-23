@@ -16,6 +16,7 @@ interface SpaceContextType {
 	spaces: Space[];
 	addSpace: (newSpace: Omit<Space, 'id'>) => Promise<void>;
 	deleteSpace: (id: string) => Promise<void>;
+	updateSpaceName: (id: string, name: string) => Promise<void>;
 }
 
 // Création du contexte
@@ -79,7 +80,33 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 			const data = await graphqlClient.request<{ createSpace: { space: Space } }>(ADD_SPACE, variables);
 			setSpaces((prevSpaces) => [...prevSpaces, data.createSpace.space]);
 		} catch (error: any) {
-			alert(`Erreur : ${error.message}`);
+			console.log(`Erreur : ${error.message}`);
+		}
+	};
+
+	// Renommer un espace
+	const UPDATE_SPACE_NAME = gql`
+		mutation UpdateSpace($id: ID!, $name: String!) {
+			updateSpace(input: { id: $id, name: $name }) {
+				space {
+					id
+					name
+					professional
+					status
+				}
+			}
+		}
+	`;
+	const updateSpaceName = async (spaceId: string, spaceName: string) => {
+		try {
+			const variables = {
+				id: spaceId,
+				name: spaceName,
+			};
+			const data = await graphqlClient.request<{ updateSpace: { space: Space } }>(UPDATE_SPACE_NAME, variables);
+			setSpaces((prevSpaces) => prevSpaces.map((space) => (space.id === data.updateSpace.space.id ? data.updateSpace.space : space)));
+		} catch (error: any) {
+			console.log(`Erreur : ${error.message}`);
 		}
 	};
 
@@ -103,7 +130,7 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 		}
 	};
 
-	return <SpaceContext.Provider value={{ spaces, addSpace, deleteSpace }}>{children}</SpaceContext.Provider>;
+	return <SpaceContext.Provider value={{ spaces, addSpace, deleteSpace, updateSpaceName }}>{children}</SpaceContext.Provider>;
 };
 
 // Hook personnalisé pour utiliser le contexte
