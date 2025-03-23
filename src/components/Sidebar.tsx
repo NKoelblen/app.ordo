@@ -19,6 +19,71 @@ const Sidebar = () => {
 		return <div>Chargement...</div>;
 	}
 
+	const buildHierarchy = (spaces: Space[]): (Space & { children: Space[] })[] => {
+		const spaceMap: Map<string, Space & { children: Space[] }> = new Map();
+
+		// Initialiser chaque espace avec un tableau `children`
+		spaces.forEach((space) => {
+			spaceMap.set(space.id, { ...space, children: [] });
+		});
+
+		const rootSpaces: (Space & { children: Space[] })[] = [];
+
+		// Construire la hiérarchie
+		spaces.forEach((space) => {
+			if (space.parent?.id) {
+				const parentSpace = spaceMap.get(space.parent.id);
+				if (parentSpace) {
+					parentSpace.children.push(spaceMap.get(space.id)!);
+				}
+			} else {
+				rootSpaces.push(spaceMap.get(space.id)!);
+			}
+		});
+
+		return rootSpaces;
+	};
+
+	const renderSpaces = (spaces: (Space & { children: Space[] })[]) => {
+		return (
+			<ul>
+				{spaces.map((space) => (
+					<li
+						key={space.id}
+						className="nav-item"
+					>
+						<Box className="nav-summary">
+							{isEditingSpace[space.id] ? (
+								<TextField
+									inputRef={(el) => {
+										if (el && isEditingSpace[space.id]) {
+											el.focus();
+										}
+									}}
+									value={newSpaceName}
+									onChange={(event) => setNewSpaceName(event.target.value)}
+									onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => handleKeyDown(event, space.id)}
+									fullWidth
+								/>
+							) : (
+								<Box>
+									<span>{space.name}</span>
+									{space.status === 'archived' && <ArchiveIcon />}
+								</Box>
+							)}
+							{/* Bouton du menu */}
+							<IconButton onClick={(e) => handleMenuOpen(e, space.status === 'archived' ? 'archivedSpaceMenu' : 'spaceMenu', space)}>
+								<MoreHorizIcon />
+							</IconButton>
+						</Box>
+						{/* Appel récursif pour afficher les enfants */}
+						{space.children.length > 0 && renderSpaces(space.children)}
+					</li>
+				))}
+			</ul>
+		);
+	};
+
 	const handleShowArchivedSpaces = () => {
 		setShowrchivedSpaces((prev) => !prev);
 		setStatusFilter((prev) => (prev === 'open' ? null : 'open'));
@@ -80,7 +145,7 @@ const Sidebar = () => {
 				Ordo
 			</Link>
 
-			<Box className="nav-item nav-title">
+			<Box className="nav-summary nav-title">
 				<span>Espaces</span>
 
 				<IconButton onClick={(e) => handleMenuOpen(e, 'spacesMenu')}>
@@ -88,37 +153,7 @@ const Sidebar = () => {
 				</IconButton>
 			</Box>
 
-			<ul>
-				{spaces.map((space) => (
-					<li
-						key={space.id}
-						className="nav-item"
-					>
-						{isEditingSpace[space.id] ? (
-							<TextField
-								inputRef={(el) => {
-									if (el && isEditingSpace[space.id]) {
-										el.focus();
-									}
-								}}
-								value={newSpaceName}
-								onChange={(event) => setNewSpaceName(event.target.value)}
-								onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => handleKeyDown(event, space.id)}
-								fullWidth
-							/>
-						) : (
-							<Box>
-								<span>{space.name}</span>
-								{space.status === 'archived' && <ArchiveIcon />}{' '}
-							</Box>
-						)}
-						{/* Bouton du menu */}
-						<IconButton onClick={(e) => handleMenuOpen(e, space.status === 'archived' ? 'archivedSpaceMenu' : 'spaceMenu', space)}>
-							<MoreHorizIcon />
-						</IconButton>
-					</li>
-				))}
-			</ul>
+			{renderSpaces(buildHierarchy(spaces))}
 
 			{/* Menu */}
 			<Menu
