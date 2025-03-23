@@ -16,9 +16,10 @@ export interface Space {
 interface SpaceContextType {
 	spaces: Space[];
 	addSpace: (newSpace: Omit<Space, 'id'>) => Promise<void>;
-	deleteSpace: (id: string) => Promise<void>;
 	updateSpaceName: (id: string, name: string) => Promise<void>;
 	updateSpaceProfessional: (id: string, professional: boolean) => Promise<void>;
+	updateSpaceStatus: (id: string, status: 'open' | 'archived') => Promise<void>;
+	deleteSpace: (id: string) => Promise<void>;
 }
 
 // Création du contexte
@@ -160,27 +161,6 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 			};
 			const data = await graphqlClient.request<{ updateSpace: { space: Space } }>(UPDATE_SPACE_PROFESSIONAL, variables);
 
-			// Fonction pour récupérer tous les descendants d'un espace
-			const getDescendants = (space: Space, allSpaces: Space[]): Space[] => {
-				let descendants: Space[] = [];
-
-				// Parcourt les enfants de l'espace actuel
-				space.children?.edges.forEach((child) => {
-					// Ajoute l'enfant actuel à la liste des descendants
-					descendants.push(child.node);
-
-					// Recherche l'espace correspondant dans la liste globale
-					const matchingSpace = allSpaces.find((s) => s.id === child.node.id);
-
-					// Si un espace correspondant est trouvé, récupère récursivement ses descendants
-					if (matchingSpace) {
-						descendants = descendants.concat(getDescendants(matchingSpace, allSpaces));
-					}
-				});
-
-				return descendants;
-			};
-
 			// Récupère tous les descendants de l'espace mis à jour
 			const descendants = getDescendants(data.updateSpace.space, spaces);
 
@@ -192,6 +172,46 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 						return {
 							...space,
 							professional: spaceProfessional,
+						};
+					}
+					return space;
+				})
+			);
+		} catch (error: any) {
+			console.log(`Erreur : ${error.message}`);
+		}
+	};
+
+	// Modifier le statut un espace
+	const UPDATE_SPACE_STATUS = gql`
+		mutation UpdateSpace($id: ID!, $status: String!) {
+			updateSpace(input: { id: $id, status: $status }) {
+				space {
+					...SpaceFields
+				}
+			}
+		}
+		${SPACE_FIELDS}
+	`;
+	const updateSpaceStatus = async (spaceId: string, spaceStatus: 'open' | 'archived') => {
+		try {
+			const variables = {
+				id: spaceId,
+				status: spaceStatus,
+			};
+			const data = await graphqlClient.request<{ updateSpace: { space: Space } }>(UPDATE_SPACE_STATUS, variables);
+
+			// Récupère tous les descendants de l'espace mis à jour
+			const descendants = getDescendants(data.updateSpace.space, spaces);
+
+			// Met à jour l'état global
+			setSpaces((prevSpaces) =>
+				prevSpaces.map((space) => {
+					// Met à jour l'espace cible ou ses descendants
+					if (space.id === spaceId || descendants.some((descendant) => descendant.id === space.id)) {
+						return {
+							...space,
+							status: spaceStatus,
 						};
 					}
 					return space;
@@ -222,7 +242,28 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 		}
 	};
 
-	return <SpaceContext.Provider value={{ spaces, addSpace, deleteSpace, updateSpaceName, updateSpaceProfessional }}>{children}</SpaceContext.Provider>;
+	// Fonction pour récupérer tous les descendants d'un espace
+	const getDescendants = (space: Space, allSpaces: Space[]): Space[] => {
+		let descendants: Space[] = [];
+
+		// Parcourt les enfants de l'espace actuel
+		space.children?.edges.forEach((child) => {
+			// Ajoute l'enfant actuel à la liste des descendants
+			descendants.push(child.node);
+
+			// Recherche l'espace correspondant dans la liste globale
+			const matchingSpace = allSpaces.find((s) => s.id === child.node.id);
+
+			// Si un espace correspondant est trouvé, récupère récursivement ses descendants
+			if (matchingSpace) {
+				descendants = descendants.concat(getDescendants(matchingSpace, allSpaces));
+			}
+		});
+
+		return descendants;
+	};
+
+	return <SpaceContext.Provider value={{ spaces, addSpace, deleteSpace, updateSpaceName, updateSpaceProfessional, updateSpaceStatus }}>{children}</SpaceContext.Provider>;
 };
 
 // Hook personnalisé pour utiliser le contexte

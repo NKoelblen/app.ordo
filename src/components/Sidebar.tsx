@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Drawer, Menu, MenuItem, ListItemIcon, ListItemText, IconButton, Box, TextField, Checkbox, FormControlLabel } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { MoreHoriz as MoreHorizIcon, Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import { MoreHoriz as MoreHorizIcon, Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, Archive as ArchiveIcon, Unarchive as UnarchiveIcon } from '@mui/icons-material';
 import { useSpaces, Space } from '../contexts/SpaceContext';
 import AddSpaceModal from './SpaceForm';
 import '../styles/components/Sidebar.scss';
 
 const Sidebar = () => {
-	const { spaces, deleteSpace, updateSpaceName, updateSpaceProfessional } = useSpaces();
+	const { spaces, updateSpaceName, updateSpaceProfessional, updateSpaceStatus, deleteSpace } = useSpaces();
 	const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
 
 	const [isEditingSpace, setIsEditingSpace] = useState<{ [key: string]: boolean }>({});
@@ -30,8 +30,13 @@ const Sidebar = () => {
 		}
 	};
 
-	const handleUpdateSpaceProfessional = (spaceId: string, isProfessional: boolean) => {
-		updateSpaceProfessional(spaceId, isProfessional);
+	const handleUpdateSpaceProfessional = (spaceId: string, isSpaceProfessional: boolean) => {
+		updateSpaceProfessional(spaceId, isSpaceProfessional);
+		handleMenuClose();
+	};
+
+	const handleUpdateSpaceStatus = (spaceId: string, spaceStatus: 'open' | 'archived') => {
+		updateSpaceStatus(spaceId, spaceStatus);
 		handleMenuClose();
 	};
 
@@ -70,10 +75,8 @@ const Sidebar = () => {
 			</Link>
 
 			<Box className="nav-item nav-title">
-				{/* Titre */}
 				<span>Espaces</span>
 
-				{/* Bouton du menu */}
 				<IconButton onClick={(e) => handleMenuOpen(e, 'spacesMenu')}>
 					<MoreHorizIcon />
 				</IconButton>
@@ -98,10 +101,13 @@ const Sidebar = () => {
 								fullWidth
 							/>
 						) : (
-							<span>{space.name}</span>
+							<Box>
+								<span>{space.name}</span>
+								{space.status === 'archived' && <ArchiveIcon />}{' '}
+							</Box>
 						)}
 						{/* Bouton du menu */}
-						<IconButton onClick={(e) => handleMenuOpen(e, 'spaceMenu', space)}>
+						<IconButton onClick={(e) => handleMenuOpen(e, space.status === 'archived' ? 'archivedSpaceMenu' : 'spaceMenu', space)}>
 							<MoreHorizIcon />
 						</IconButton>
 					</li>
@@ -170,6 +176,40 @@ const Sidebar = () => {
 								}
 								label="Professionnel"
 							/>
+						</MenuItem>,
+						<MenuItem
+							key={`archive-space-${selectedSpace.id}`}
+							onClick={() => {
+								handleUpdateSpaceStatus(selectedSpace.id, 'archived');
+							}}
+						>
+							<ListItemIcon>
+								<ArchiveIcon />
+							</ListItemIcon>
+							<ListItemText>Archiver</ListItemText>
+						</MenuItem>,
+						<MenuItem
+							key={`delete-space-${selectedSpace.id}`}
+							onClick={() => handleDeleteSpace(selectedSpace.id)}
+						>
+							<ListItemIcon>
+								<DeleteIcon />
+							</ListItemIcon>
+							<ListItemText>Supprimer</ListItemText>
+						</MenuItem>,
+					]}
+				{menuType === 'archivedSpaceMenu' &&
+					selectedSpace && [
+						<MenuItem
+							key={`archive-space-${selectedSpace.id}`}
+							onClick={() => {
+								handleUpdateSpaceStatus(selectedSpace.id, 'open');
+							}}
+						>
+							<ListItemIcon>
+								<UnarchiveIcon />
+							</ListItemIcon>
+							<ListItemText>Restaurer</ListItemText>
 						</MenuItem>,
 						<MenuItem
 							key={`delete-space-${selectedSpace.id}`}
