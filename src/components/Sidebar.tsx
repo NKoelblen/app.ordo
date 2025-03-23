@@ -21,6 +21,7 @@ const Sidebar = () => {
 	const [showArchivedSpaces, setShowrchivedSpaces] = useState(false);
 	const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
 
+	const [parentSpace, setParentSpace] = useState<Space | null>(null);
 	const [isEditingSpace, setIsEditingSpace] = useState<{ [key: string]: boolean }>({});
 	const [currentSpaceName, setCurrentSpaceName] = useState<string>('');
 	const [newSpaceName, setNewSpaceName] = useState<string>(currentSpaceName);
@@ -100,10 +101,10 @@ const Sidebar = () => {
 
 						{space.children.length > 0 && (
 							<Collapse
+								className="nav-item-children"
 								in={expandedSpaces.has(space.id)}
 								timeout="auto"
 								unmountOnExit
-								style={{ paddingLeft: `${level * 0.5}rem` }}
 							>
 								{renderSpaces(space.children, level + 1)}
 							</Collapse>
@@ -221,6 +222,7 @@ const Sidebar = () => {
 					<MenuItem
 						key="add-space"
 						onClick={() => {
+							setParentSpace(null);
 							setModalOpen(true);
 							handleMenuClose();
 						}}
@@ -245,6 +247,20 @@ const Sidebar = () => {
 				{menuType === 'spaceMenu' &&
 					selectedSpace && [
 						<MenuItem
+							key="add-child-space"
+							onClick={() => {
+								setParentSpace(selectedSpace);
+								setModalOpen(true);
+								handleMenuClose();
+							}}
+						>
+							<ListItemIcon>
+								<AddIcon />
+							</ListItemIcon>
+							<ListItemText>Ajouter un sous-espace</ListItemText>
+						</MenuItem>,
+
+						<MenuItem
 							key={`rename-space-${selectedSpace.id}`}
 							onClick={() => {
 								if (selectedSpace) {
@@ -261,8 +277,8 @@ const Sidebar = () => {
 							<ListItemText>Renommer</ListItemText>
 						</MenuItem>,
 						<MenuItem
-							className="menu-item-checkbox"
 							key={`update-space-professional-${selectedSpace.id}`}
+							className="menu-item-checkbox"
 						>
 							<FormControlLabel
 								control={
@@ -280,7 +296,7 @@ const Sidebar = () => {
 								label="Professionnel"
 							/>
 						</MenuItem>,
-						<Divider />,
+						<Divider key={`divider-${selectedSpace.id}`} />,
 						<MenuItem
 							key={`archive-space-${selectedSpace.id}`}
 							onClick={() => {
@@ -329,7 +345,11 @@ const Sidebar = () => {
 
 			<AddSpaceModal
 				open={modalOpen}
-				handleClose={() => setModalOpen(false)}
+				handleClose={() => {
+					setModalOpen(false);
+					setParentSpace(null);
+				}}
+				parentSpace={parentSpace}
 			/>
 		</Drawer>
 	);
