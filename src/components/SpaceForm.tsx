@@ -16,13 +16,13 @@ const modalStyle = {
 
 import { Space } from '../contexts/SpaceContext'; // Adjust the import path based on your project structure
 
-interface AddSpaceModalProps {
+interface SpaceFormProps {
 	open: boolean;
 	handleClose: () => void;
 	parentSpace?: Space | null;
 }
 
-const AddSpaceModal = ({ open, handleClose, parentSpace }: AddSpaceModalProps) => {
+const SpaceForm = ({ open, handleClose, parentSpace }: SpaceFormProps) => {
 	const { addSpace } = useSpaces();
 	const [name, setName] = useState('');
 	const [professional, setProfessional] = useState(false);
@@ -103,4 +103,4 @@ const AddSpaceModal = ({ open, handleClose, parentSpace }: AddSpaceModalProps) =
 	);
 };
 
-export default AddSpaceModal;
+export default SpaceForm;

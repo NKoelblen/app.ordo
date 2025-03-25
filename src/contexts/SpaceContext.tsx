@@ -92,7 +92,7 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 				name: newSpace.name,
 				status: newSpace.status,
 				professional: newSpace.professional,
-				parent: newSpace.parent,
+				parent: newSpace.parent?.id,
 			};
 			const data = await graphqlClient.request<{ createSpace: { space: Space } }>(ADD_SPACE, variables);
 			setSpaces((prevSpaces) => [...prevSpaces, data.createSpace.space]);
@@ -106,12 +106,11 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 		mutation UpdateSpace($id: ID!, $name: String!) {
 			updateSpace(input: { id: $id, name: $name }) {
 				space {
-					id
-					name
-					status
+					...SpaceFields
 				}
 			}
 		}
+		${SPACE_FIELDS}
 	`;
 	const updateName = async (spaceId: string, spaceName: string) => {
 		try {

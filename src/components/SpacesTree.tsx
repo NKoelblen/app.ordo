@@ -3,23 +3,13 @@ import { Menu, MenuItem, ListItemIcon, ListItemText, IconButton, Box, Checkbox, 
 import { RichTreeView, TreeItem2, TreeItem2Label, TreeItem2Props, TreeItem2LabelInput, UseTreeItem2LabelSlotOwnProps, UseTreeItem2LabelInputSlotOwnProps } from '@mui/x-tree-view';
 import { TreeViewBaseItem } from '@mui/x-tree-view/models';
 import { useTreeItem2Utils } from '@mui/x-tree-view/hooks';
-import {
-	MoreHoriz as MoreHorizIcon,
-	Add as AddIcon,
-	Delete as DeleteIcon,
-	Edit as EditIcon,
-	Archive as ArchiveIcon,
-	Unarchive as UnarchiveIcon,
-	Check as CheckIcon,
-	CloseRounded as CloseRoundedIcon,
-} from '@mui/icons-material';
+import { MoreHoriz as MoreHorizIcon, Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, Archive as ArchiveIcon, Unarchive as UnarchiveIcon } from '@mui/icons-material';
 import { useSpaces, Space } from '../contexts/SpaceContext';
 import SpaceForm from './SpaceForm';
 
 const SpacesTree = () => {
 	const { spaces, updateName, updateProfessional, updateStatus, deleteSpace, setStatusFilter, updateParent } = useSpaces();
 	const [showArchived, setShowArchived] = useState(false);
-	const filteredSpaces = showArchived ? spaces : spaces.filter((space) => space.status !== 'archived');
 
 	const [parentSpace, setParentSpace] = useState<Space | null>(null);
 
@@ -188,37 +178,23 @@ const SpacesTree = () => {
 		const { handleCancelItemLabelEditing, handleSaveItemLabel, value, spaceId, ...other } = props;
 
 		return (
-			<React.Fragment>
+			<Box className="nav-item">
 				<TreeItem2LabelInput
 					defaultValue={value}
 					{...other}
 				/>
-				<IconButton
-					color="success"
-					size="small"
-					onClick={(event: React.MouseEvent) => {
-						handleSaveItemLabel(event, spaceId, value);
-					}}
-				>
-					<CheckIcon fontSize="small" />
-				</IconButton>
-				<IconButton
-					color="error"
-					size="small"
-					onClick={handleCancelItemLabelEditing}
-				>
-					<CloseRoundedIcon fontSize="small" />
-				</IconButton>
-			</React.Fragment>
+			</Box>
 		);
 	}
 
 	const CustomTreeItem = React.forwardRef(function CustomTreeItem(props: TreeItem2Props, ref: React.Ref<HTMLLIElement>) {
+		const space = spaces.find((space) => space.id === props.itemId);
+		if (!space) return null;
+
 		const { interactions, status } = useTreeItem2Utils({
 			itemId: props.itemId,
 			children: props.children,
 		});
-		const space = spaces.find((space) => space.id === props.itemId);
 
 		return (
 			<TreeItem2
@@ -326,7 +302,7 @@ const SpacesTree = () => {
 
 			<RichTreeView
 				id="spaces-nav"
-				items={formatSpaces(filteredSpaces)}
+				items={formatSpaces(spaces)}
 				slots={{ item: CustomTreeItem }}
 				isItemEditable={(item) => Boolean(item?.editable)}
 				experimentalFeatures={{ labelEditing: true }}
