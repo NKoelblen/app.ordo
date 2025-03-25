@@ -3,11 +3,11 @@
 .sidebar {
 	width: 232px;
 	flex-shrink: 0;
+
 	& .MuiDrawer-paper {
 		width: 232px;
 		box-sizing: border-box;
 	}
-
 	&-title {
 		font-size: 2rem;
 		font-weight: bold;
@@ -16,23 +16,21 @@
 		text-align: center;
 		border-bottom: 1px solid var(--border-color);
 	}
-
 	&-link {
 		text-decoration: none;
 		color: inherit;
 	}
-
 	.nav-title {
 		font-size: 0.75rem;
 		text-transform: uppercase;
-		padding-left: 0.75rem !important;
+		padding-left: 0.875rem !important;
 		padding-bottom: 1rem;
+		margin-right: 0.125rem;
 
 		.menu-icon {
 			opacity: 1 !important;
 		}
 	}
-
 	.nav-item {
 		display: flex;
 		align-items: center;
@@ -73,6 +71,10 @@
 	}
 
 	#spaces-nav {
+		margin: 0 0.125rem;
+		.MuiTreeItem-root {
+			margin: 0.125rem 0;
+		}
 		.MuiTreeItem-content {
 			gap: 0.5rem;
 			padding: 0 0 0 0.5rem;

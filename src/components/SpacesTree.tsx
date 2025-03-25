@@ -86,13 +86,13 @@ const SpacesTree = () => {
 					onClose={handleMenuClose}
 					anchorOrigin={{
 						vertical: 'top',
-						horizontal: 'right',
+						horizontal: 'left',
 					}}
 					transformOrigin={{
 						vertical: 'top',
 						horizontal: 'left',
 					}}
-					sx={{ mt: -0.75 }}
+					sx={{ mt: -1.75 }}
 				>
 					{space?.status === 'open' && [
 						<MenuItem
@@ -264,13 +264,13 @@ const SpacesTree = () => {
 					onClose={() => handleMenuClose()}
 					anchorOrigin={{
 						vertical: 'top',
-						horizontal: 'right',
+						horizontal: 'left',
 					}}
 					transformOrigin={{
 						vertical: 'top',
 						horizontal: 'left',
 					}}
-					sx={{ mt: -0.75 }}
+					sx={{ mt: -1.75 }}
 				>
 					<MenuItem
 						key="add-space"
