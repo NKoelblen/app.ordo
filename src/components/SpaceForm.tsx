@@ -33,7 +33,7 @@ const AddSpaceModal = ({ open, handleClose, parentSpace }: AddSpaceModalProps) =
 			name,
 			status: 'open',
 			professional,
-			parent: parentSpace ? parentSpace.id : null,
+			parent: parentSpace || null,
 		});
 		setName('');
 		setProfessional(false);
