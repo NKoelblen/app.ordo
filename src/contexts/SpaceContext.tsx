@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import graphqlClient from '../services/graphqlClient';
 import { gql } from 'graphql-request';
 
@@ -13,6 +13,8 @@ export interface Space {
 
 // Type du contexte
 interface SpaceContextType {
+	space: Space | null;
+	getSpace: (id: string) => Promise<void>;
 	spaces: Space[];
 	setStatusFilter: React.Dispatch<React.SetStateAction<string | null>>;
 	setSpaces: React.Dispatch<React.SetStateAction<Space[]>>;
@@ -30,6 +32,7 @@ const SpaceContext = createContext<SpaceContextType | undefined>(undefined);
 // Provider du contexte
 export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [spaces, setSpaces] = useState<Space[]>([]);
+	const [space, setSpace] = useState<Space | null>(null);
 	const [statusFilter, setStatusFilter] = useState<string | null>('open');
 
 	const SPACE_FIELDS = gql`
@@ -48,7 +51,7 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 	`;
 
 	// Récupérer les espaces
-	const GETS = gql`
+	const GET_SPACES = gql`
 		query GetSpaces($status: String) {
 			spaces(status: $status) {
 				edges {
@@ -64,7 +67,7 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 		const fetchSpaces = async () => {
 			try {
 				const variables = { status: statusFilter };
-				const data = await graphqlClient.request<{ spaces: { edges: { node: Space }[] } }>(GETS, variables);
+				const data = await graphqlClient.request<{ spaces: { edges: { node: Space }[] } }>(GET_SPACES, variables);
 				const spaces = data.spaces.edges.map((edge) => edge.node);
 				setSpaces(spaces);
 			} catch (error) {
@@ -74,6 +77,25 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 		fetchSpaces();
 	}, [statusFilter]);
+
+	// Récupérer un espace
+	const GET_SPACE = gql`
+		query GetSpace($id: ID!) {
+			space(id: $id) {
+				...SpaceFields
+			}
+		}
+		${SPACE_FIELDS}
+	`;
+	const getSpace = useCallback(async (id: string) => {
+		try {
+			const variables = { id: id };
+			const data = await graphqlClient.request<{ space: Space }>(GET_SPACE, variables);
+			setSpace(data.space);
+		} catch (error) {
+			console.error("Erreur lors de la récupération de l'espaces:", error);
+		}
+	}, []);
 
 	// Ajouter un espace
 	const ADD_SPACE = gql`
@@ -86,7 +108,6 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 		}
 		${SPACE_FIELDS}
 	`;
-
 	const addSpace = async (newSpace: Omit<Space, 'id'>) => {
 		try {
 			const variables = {
@@ -265,7 +286,7 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 	};
 
 	return (
-		<SpaceContext.Provider value={{ spaces, setSpaces, setStatusFilter, addSpace, deleteSpace, updateName, updateProfessional, updateStatus, updateParent }}>
+		<SpaceContext.Provider value={{ space, getSpace, spaces, setSpaces, setStatusFilter, addSpace, deleteSpace, updateName, updateProfessional, updateStatus, updateParent }}>
 			{children}
 		</SpaceContext.Provider>
 	);
