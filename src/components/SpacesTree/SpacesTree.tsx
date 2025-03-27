@@ -31,12 +31,14 @@ import '../../styles/components/TreeItem.scss';
 
 import { useSpaces, Space } from '../../contexts/SpaceContext';
 import SpaceForm from './SpaceForm';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const SpacesTree = () => {
 	const { spaces, setStatusFilter, updateName, updateProfessional, updateStatus, updateParent, deleteSpace } = useSpaces();
 	const [showArchived, setShowArchived] = useState(false);
 	const [parentSpace, setParentSpace] = useState<Space | null>(null);
+	const navigate = useNavigate();
+	const location = useLocation();
 
 	// Drag and drop
 	const initialItems = useMemo(() => {
@@ -375,6 +377,10 @@ const SpacesTree = () => {
 							confirm('Êtes-vous sûr de vouloir supprimer cet espace ?');
 							deleteSpace(space.id);
 							handleMenuClose();
+							const currentSpaceId = location.pathname.split('/').pop();
+							if (space.id === `/api/spaces/${currentSpaceId}`) {
+								navigate('/');
+							}
 						}}
 					>
 						<ListItemIcon>
