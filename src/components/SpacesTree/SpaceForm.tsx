@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Modal, Box, TextField, Button, Typography, Fade, Backdrop, FormControlLabel, Checkbox } from '@mui/material';
-import { useSpaces } from '../contexts/SpaceContext';
+import { useSpaces } from '../../contexts/SpaceContext';
 
 const modalStyle = {
 	position: 'absolute' as 'absolute',
@@ -14,7 +14,7 @@ const modalStyle = {
 	borderRadius: '8px',
 };
 
-import { Space } from '../contexts/SpaceContext'; // Adjust the import path based on your project structure
+import { Space } from '../../contexts/SpaceContext';
 
 interface SpaceFormProps {
 	open: boolean;

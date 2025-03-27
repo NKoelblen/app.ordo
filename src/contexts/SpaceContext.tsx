@@ -15,6 +15,7 @@ export interface Space {
 interface SpaceContextType {
 	spaces: Space[];
 	setStatusFilter: React.Dispatch<React.SetStateAction<string | null>>;
+	setSpaces: React.Dispatch<React.SetStateAction<Space[]>>;
 	addSpace: (newSpace: Omit<Space, 'id'>) => Promise<void>;
 	updateName: (id: string, name: string) => Promise<void>;
 	updateProfessional: (id: string, professional: boolean) => Promise<void>;
@@ -205,18 +206,16 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 		}
 	};
 
-	// Renommer un espace
+	// Modifier le parent d'un espace
 	const UPDATE_PARENT = gql`
-		mutation UpdateSpace($id: ID!, $parent: ID) {
+		mutation UpdateSpace($id: ID!, $parent: String) {
 			updateSpace(input: { id: $id, parent: $parent }) {
 				space {
-					id
-					parent {
-						id
-					}
+					...SpaceFields
 				}
 			}
 		}
+		${SPACE_FIELDS}
 	`;
 	const updateParent = async (spaceId: string, newParentId: string | null) => {
 		try {
@@ -224,7 +223,8 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 				id: spaceId,
 				parent: newParentId,
 			};
-			await graphqlClient.request<{ updateSpace: { space: Space } }>(UPDATE_PARENT, variables);
+			const data = await graphqlClient.request<{ updateSpace: { space: Space } }>(UPDATE_PARENT, variables);
+			setSpaces((prevSpaces) => prevSpaces.map((space) => (space.id === data.updateSpace.space.id ? data.updateSpace.space : space)));
 		} catch (error: any) {
 			console.log(`Erreur : ${error.message}`);
 		}
@@ -250,7 +250,7 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 		}
 	};
 
-	// Fonction pour récupérer tous les descendants d'un espace
+	// Récupérer tous les descendants d'un espace
 	const getDescendants = (space: Space, allSpaces: Space[]): Space[] => {
 		let descendants: Space[] = [];
 
@@ -265,13 +265,13 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 	};
 
 	return (
-		<SpaceContext.Provider value={{ spaces, setStatusFilter, addSpace, deleteSpace, updateName, updateProfessional, updateStatus, updateParent }}>
+		<SpaceContext.Provider value={{ spaces, setSpaces, setStatusFilter, addSpace, deleteSpace, updateName, updateProfessional, updateStatus, updateParent }}>
 			{children}
 		</SpaceContext.Provider>
 	);
 };
 
-// Hook personnalisé pour utiliser le contexte
+// Hook pour utiliser le contexte
 export const useSpaces = (): SpaceContextType => {
 	const context = useContext(SpaceContext);
 	if (!context) {

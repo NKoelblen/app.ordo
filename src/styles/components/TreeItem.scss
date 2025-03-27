@@ -1,0 +1,25 @@
+.wrapper {
+	// Sizing
+	box-sizing: border-box;
+	// Spacing
+	padding-left: var(--spacing);
+	// Typography
+	list-style: none;
+
+	&.ghost {
+		> * {
+			// Background
+			background-color: rgba(144, 202, 249, 0.24);
+		}
+	}
+	.collapse {
+		&.collapsed svg {
+			// Effects
+			transform: rotate(-90deg);
+		}
+		svg {
+			// Animation
+			transition: transform 250ms ease;
+		}
+	}
+}
