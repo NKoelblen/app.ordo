@@ -1,0 +1,18 @@
+.menu {
+	.menu-item-checkbox {
+		// Spacing
+		margin-right: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+
+		label {
+			// Spacing
+			margin-left: -0.375rem;
+		}
+		.menu-item-checkbox-input {
+			// Spacing
+			margin-right: 0.375rem;
+			padding: 0.375rem;
+		}
+	}
+}

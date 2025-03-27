@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Modal, Box, TextField, Button, Typography, Fade, Backdrop, FormControlLabel, Checkbox } from '@mui/material';
-import { useSpaces } from '../contexts/SpaceContext';
+import { useSpaces } from '../../contexts/SpaceContext';
 
 const modalStyle = {
 	position: 'absolute' as 'absolute',
@@ -14,15 +14,15 @@ const modalStyle = {
 	borderRadius: '8px',
 };
 
-import { Space } from '../contexts/SpaceContext'; // Adjust the import path based on your project structure
+import { Space } from '../../contexts/SpaceContext';
 
-interface AddSpaceModalProps {
+interface SpaceFormProps {
 	open: boolean;
 	handleClose: () => void;
 	parentSpace?: Space | null;
 }
 
-const AddSpaceModal = ({ open, handleClose, parentSpace }: AddSpaceModalProps) => {
+const SpaceForm = ({ open, handleClose, parentSpace }: SpaceFormProps) => {
 	const { addSpace } = useSpaces();
 	const [name, setName] = useState('');
 	const [professional, setProfessional] = useState(false);
@@ -33,7 +33,7 @@ const AddSpaceModal = ({ open, handleClose, parentSpace }: AddSpaceModalProps) =
 			name,
 			status: 'open',
 			professional,
-			parent: parentSpace ? parentSpace.id : null,
+			parent: parentSpace || null,
 		});
 		setName('');
 		setProfessional(false);
@@ -103,4 +103,4 @@ const AddSpaceModal = ({ open, handleClose, parentSpace }: AddSpaceModalProps) =
 	);
 };
 
-export default AddSpaceModal;
+export default SpaceForm;
