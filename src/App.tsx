@@ -1,10 +1,10 @@
+import { Outlet } from 'react-router-dom';
 import { useState } from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { darkTheme, lightTheme } from './theme/theme';
 import '@mui/material/styles';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/700.css';
-// import './App.css';
 import './styles/base/base.scss';
 import ThemeToggle from './components/ThemeToggle';
 import Sidebar from './components/Sidebar';
@@ -28,8 +28,7 @@ const App = () => {
 					toggleTheme={toggleTheme}
 					isDarkMode={isDarkMode}
 				/>
-				<h1>Bienvenue sur Ordo</h1>
-				<p>Ceci est le contenu principal de l'application.</p>
+				<Outlet />
 			</div>
 		</ThemeProvider>
 	);

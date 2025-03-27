@@ -31,6 +31,7 @@ import '../../styles/components/TreeItem.scss';
 
 import { useSpaces, Space } from '../../contexts/SpaceContext';
 import SpaceForm from './SpaceForm';
+import { Link } from 'react-router-dom';
 
 const SpacesTree = () => {
 	const { spaces, setStatusFilter, updateName, updateProfessional, updateStatus, updateParent, deleteSpace } = useSpaces();
@@ -265,6 +266,7 @@ const SpacesTree = () => {
 	// Tree
 
 	function CustomLabel({ space, editable, editing, children, toggleItemEditing, onCollapse, collapsed, ...other }: CustomLabelProps) {
+		const id = space.id.split('/').pop();
 		return (
 			<TreeItem2Label
 				{...other}
@@ -278,10 +280,13 @@ const SpacesTree = () => {
 					/>
 				)}
 
-				<Box className="nav-item-summary">
+				<Link
+					to={`/space/${id}`}
+					className="nav-item-summary sidebar-link"
+				>
 					<span>{children}</span>
 					{space.status === 'archived' && <ArchiveIcon />}
-				</Box>
+				</Link>
 
 				<IconButton
 					id={`menu-button-${space.id}`}
