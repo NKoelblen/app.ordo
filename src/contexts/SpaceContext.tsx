@@ -142,6 +142,7 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 			};
 			const data = await graphqlClient.request<{ updateSpace: { space: Space } }>(UPDATE_NAME, variables);
 			setSpaces((prevSpaces) => prevSpaces.map((space) => (space.id === data.updateSpace.space.id ? data.updateSpace.space : space)));
+			setSpace((prevSpace) => (prevSpace && prevSpace.id === data.updateSpace.space.id ? data.updateSpace.space : prevSpace));
 		} catch (error: any) {
 			console.log(`Erreur : ${error.message}`);
 		}
@@ -182,6 +183,7 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 					return space;
 				})
 			);
+			setSpace((prevSpace) => (prevSpace && prevSpace.id === data.updateSpace.space.id ? data.updateSpace.space : prevSpace));
 		} catch (error: any) {
 			console.log(`Erreur : ${error.message}`);
 		}
@@ -222,6 +224,7 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 					return space;
 				})
 			);
+			setSpace((prevSpace) => (prevSpace && prevSpace.id === data.updateSpace.space.id ? data.updateSpace.space : prevSpace));
 		} catch (error: any) {
 			console.log(`Erreur : ${error.message}`);
 		}
@@ -246,6 +249,7 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 			};
 			const data = await graphqlClient.request<{ updateSpace: { space: Space } }>(UPDATE_PARENT, variables);
 			setSpaces((prevSpaces) => prevSpaces.map((space) => (space.id === data.updateSpace.space.id ? data.updateSpace.space : space)));
+			setSpace((prevSpace) => (prevSpace && prevSpace.id === data.updateSpace.space.id ? data.updateSpace.space : prevSpace));
 		} catch (error: any) {
 			console.log(`Erreur : ${error.message}`);
 		}

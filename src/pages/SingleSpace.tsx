@@ -18,7 +18,7 @@ const SingleSpace = () => {
 
 	return (
 		<>
-			<h1>Bienvenue sur l'espace {space.name}</h1>
+			<h1>Bienvenue sur l'espace {space.name} !</h1>
 			<p>Ceci est le contenu principal de l'espace.</p>
 		</>
 	);
