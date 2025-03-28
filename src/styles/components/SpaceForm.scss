@@ -1,0 +1,31 @@
+.modal-form {
+	.modal-form-content {
+		// Layout
+		position: absolute;
+		left: 0;
+		right: 0;
+		display: flex;
+		flex-direction: column;
+		// Sizing
+		width: 480px;
+		// Spacing
+		margin: 2rem auto;
+		padding: 1rem;
+		gap: 1rem;
+
+		#space-form {
+			// Layout
+			display: flex;
+			flex-direction: column;
+			// Spacing
+			gap: 1rem;
+
+			#pickers {
+				// Layout
+				display: flex;
+				// Spacing
+				gap: 2rem;
+			}
+		}
+	}
+}

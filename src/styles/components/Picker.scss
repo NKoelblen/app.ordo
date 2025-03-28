@@ -1,0 +1,20 @@
+.picker-container {
+	// Layout
+	align-items: center;
+	// Spacing
+	gap: 0.5rem;
+	.picker-input {
+		// Spacing
+		padding: 0.25rem;
+	}
+}
+.picker {
+	// Spacing
+	margin-top: 1rem;
+	.MuiPopover-paper {
+		// Sizing
+		width: 100%;
+		// Spacing
+		padding: 1rem;
+	}
+}

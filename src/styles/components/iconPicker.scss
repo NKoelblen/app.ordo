@@ -1,0 +1,68 @@
+.picker.icon-picker {
+	// Sizing
+	width: 31.25rem;
+	height: 27rem;
+	> .MuiPopover-paper {
+		// Layout
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.icon-search {
+		// box-sizing
+		width: 100%;
+	}
+	.icon-grid {
+		// Sizing
+		width: 100%;
+		// Spaging
+		gap: 0.25rem;
+
+		.color-item {
+			// Sizing
+			width: 6rem;
+
+			.color-name {
+				// Sizing
+				width: 6rem;
+				// Typography
+				line-height: 2rem;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			.shades {
+				// Spacing
+				gap: 0.125rem;
+
+				.shade-container {
+					// Layout
+					justify-content: center;
+					align-items: center;
+					// Sizing
+					width: 6rem;
+					height: 2.5rem;
+					// Interactivity
+					// Border
+					border-radius: 0.25rem;
+					cursor: pointer;
+
+					.shade {
+						// Layout
+						justify-content: center;
+						align-items: center;
+						// Sizing
+						width: 5.75rem;
+						height: 2.25rem;
+						// Border
+						border-radius: 0.25rem;
+						// Animation
+						transition: border 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+					}
+				}
+			}
+		}
+	}
+}
