@@ -6,6 +6,8 @@ export interface TreeItem extends TreeViewBaseItem {
 	editable: boolean;
 	professional: boolean;
 	status: 'open' | 'archived';
+	color: string | null;
+	icon: string | null;
 	descendants: TreeItem[];
 	collapsed: boolean;
 }

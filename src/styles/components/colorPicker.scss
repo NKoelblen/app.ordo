@@ -1,0 +1,82 @@
+.color-picker-container {
+	align-items: center;
+	gap: 0.5rem;
+	.color-input {
+		padding: 0.25rem;
+		&:hover {
+			color: inherit;
+		}
+	}
+}
+.color-picker {
+	// Sizing
+	width: 32rem;
+	height: 19rem;
+	margin-top: 1rem;
+	.MuiPopover-paper {
+		width: 100%;
+		// Spacing
+		padding: 1rem;
+	}
+	.color-grid {
+		gap: 1rem;
+		text-align: center;
+		width: 100%;
+		.color-item {
+			width: 6rem;
+			.color-name {
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				width: 6rem;
+				line-height: 2rem;
+			}
+			.shades {
+				gap: 0.125rem;
+				.shade-container {
+					width: 6rem;
+					height: 2.5rem;
+					justify-content: center;
+					align-items: center;
+					cursor: pointer;
+					border-radius: 0.25rem;
+					.shade {
+						justify-content: center;
+						align-items: center;
+						width: 5.75rem;
+						height: 2.25rem;
+						border-radius: 0.25rem;
+					}
+				}
+			}
+		}
+	}
+}
+
+.color-wrapper {
+	position: relative;
+
+	.color-input {
+		border-radius: 50%;
+		cursor: pointer;
+		margin: 0 auto;
+		width: 2rem;
+		height: 2rem;
+		border-width: 1px;
+		border-style: solid;
+		border-color: inherit;
+	}
+	.popover {
+		position: absolute;
+		top: calc(100% + 8px);
+		// bottom: 0;
+		left: 0;
+		right: 0;
+
+		// left: 50%;
+		// right: 50%;
+		z-index: 2;
+	}
+	.cover {
+		background-color: #fff;
+	}
+}

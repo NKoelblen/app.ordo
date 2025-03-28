@@ -77,6 +77,8 @@ export function flatten(items: TreeItems, parentId: UniqueIdentifier | null = nu
 				editable: item.editable,
 				collapsed: item.collapsed,
 				professional: item.professional,
+				color: item.color,
+				icon: item.icon,
 				status: item.status,
 				label: item.label,
 			},

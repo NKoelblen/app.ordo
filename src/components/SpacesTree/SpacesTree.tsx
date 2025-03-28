@@ -50,6 +50,8 @@ const SpacesTree = () => {
 				label: space.name,
 				status: space.status,
 				professional: space.professional,
+				color: space.color ?? null,
+				icon: space.icon ?? null,
 				descendants: [],
 				editable: space.status === 'open',
 				collapsed: true,
@@ -117,6 +119,7 @@ const SpacesTree = () => {
 		const collapsedItems = flattenedTree.reduce<string[]>((acc, { descendants, id }) => (collapsedState[id] && descendants.length ? [...acc, id] : acc), []);
 		return removeChildrenOf(flattenedTree, activeId != null ? [activeId, ...collapsedItems] : collapsedItems);
 	}, [activeId, items, spaces]);
+
 	const projected = activeId && overId ? getProjection(flattenedItems, activeId, overId, offsetLeft, 24) : null;
 	const sensorContext: SensorContext = useRef({
 		items: flattenedItems,
@@ -199,6 +202,8 @@ const SpacesTree = () => {
 							label: space.name,
 							status: space.status,
 							professional: space.professional,
+							color: space.color ?? null,
+							icon: space.icon ?? null,
 							descendants: [],
 							editable: space.status === 'open',
 							collapsed: collapsedState[space.id] ?? true,
@@ -266,7 +271,6 @@ const SpacesTree = () => {
 	const [modalOpen, setModalOpen] = useState(false);
 
 	// Tree
-
 	function CustomLabel({ space, editable, editing, children, toggleItemEditing, onCollapse, collapsed, ...other }: CustomLabelProps) {
 		const id = space.id.split('/').pop();
 		return (
@@ -281,6 +285,10 @@ const SpacesTree = () => {
 						collapsed={collapsed}
 					/>
 				)}
+				<Box
+					className="space-icon"
+					style={{ '--background-color': space.color } as React.CSSProperties}
+				/>
 
 				<Link
 					to={`/space/${id}`}

@@ -15,10 +15,11 @@ const App = () => {
 		setIsDarkMode((prevMode) => !prevMode);
 	};
 	const theme = isDarkMode ? darkTheme : lightTheme;
+	console.log(theme);
 
 	return (
 		<ThemeProvider theme={theme}>
-			<CssBaseline />
+			<CssBaseline enableColorScheme />
 			<div
 				className={isDarkMode ? 'dark-mode' : 'light-mode'}
 				style={{ '--border-color': theme.palette.divider } as React.CSSProperties}

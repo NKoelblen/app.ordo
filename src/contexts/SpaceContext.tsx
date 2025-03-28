@@ -6,9 +6,11 @@ import { gql } from 'graphql-request';
 export interface Space {
 	id: string;
 	name: string;
-	status: 'open' | 'archived';
 	professional: boolean;
+	color?: string;
+	icon?: string;
 	parent?: Space | null;
+	status: 'open' | 'archived';
 }
 
 // Type du contexte
@@ -40,6 +42,8 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 			id
 			name
 			professional
+			color
+			icon
 			status
 			parent {
 				id
@@ -99,8 +103,8 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 	// Ajouter un espace
 	const ADD_SPACE = gql`
-		mutation CreateSpace($name: String!, $status: String!, $professional: Boolean!, $parent: String) {
-			createSpace(input: { name: $name, status: $status, professional: $professional, parent: $parent }) {
+		mutation CreateSpace($name: String!, $status: String!, $professional: Boolean!, $color: String, $icon: String, $parent: String) {
+			createSpace(input: { name: $name, status: $status, professional: $professional, color: $color, icon: $icon, parent: $parent }) {
 				space {
 					...SpaceFields
 				}
@@ -114,6 +118,8 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 				name: newSpace.name,
 				status: newSpace.status,
 				professional: newSpace.professional,
+				color: newSpace.color,
+				icon: newSpace.icon,
 				parent: newSpace.parent?.id,
 			};
 			const data = await graphqlClient.request<{ createSpace: { space: Space } }>(ADD_SPACE, variables);
@@ -148,16 +154,59 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 		}
 	};
 
+	// Modifier les paramètres d'un espace
+	const UPDATE_PARAMS = gql`
+		mutation UpdateSpace($id: ID!, $professional: Boolean!, $color: String, $icon: String) {
+			updateSpace(input: { id: $id, professional: $professional, color: $color, icon: $icon }) {
+				space {
+					...SpaceFields
+				}
+			}
+		}
+		${SPACE_FIELDS}
+	`;
+	const updateParams = async (spaceId: string, spaceProfessional: boolean, spaceColor: string, spaceIcon: string) => {
+		try {
+			const variables = {
+				id: spaceId,
+				professional: spaceProfessional,
+				color: spaceColor,
+				icon: spaceIcon,
+			};
+			const data = await graphqlClient.request<{ updateSpace: { space: Space } }>(UPDATE_PARAMS, variables);
+
+			// Récupère tous les descendants de l'espace mis à jour
+			const descendants = getDescendants(data.updateSpace.space, spaces);
+
+			// Met à jour l'état global
+			setSpaces((prevSpaces) =>
+				prevSpaces.map((space) => {
+					// Met à jour l'espace cible ou ses descendants
+					if (space.id === spaceId || descendants.some((descendant) => descendant.id === space.id)) {
+						return {
+							...space,
+							professional: spaceProfessional,
+						};
+					}
+					return space;
+				})
+			);
+			setSpace((prevSpace) => (prevSpace && prevSpace.id === data.updateSpace.space.id ? data.updateSpace.space : prevSpace));
+		} catch (error: any) {
+			console.log(`Erreur : ${error.message}`);
+		}
+	};
+
 	// Modifier la propriété professional d'un espace
 	const UPDATE_PROFESSIONAL = gql`
 		mutation UpdateSpace($id: ID!, $professional: Boolean!) {
 			updateSpace(input: { id: $id, professional: $professional }) {
 				space {
-					id
-					professional
+					...SpaceFields
 				}
 			}
 		}
+		${SPACE_FIELDS}
 	`;
 	const updateProfessional = async (spaceId: string, spaceProfessional: boolean) => {
 		try {
