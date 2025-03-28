@@ -1,82 +1,62 @@
-.color-picker-container {
-	align-items: center;
-	gap: 0.5rem;
-	.color-input {
-		padding: 0.25rem;
-		&:hover {
-			color: inherit;
-		}
-	}
+.picker-container .color-input:hover {
+	// Typography
+	color: inherit;
 }
-.color-picker {
+.picker.color-picker {
 	// Sizing
 	width: 32rem;
 	height: 19rem;
-	margin-top: 1rem;
-	.MuiPopover-paper {
-		width: 100%;
-		// Spacing
-		padding: 1rem;
-	}
+
 	.color-grid {
-		gap: 1rem;
-		text-align: center;
+		// Sizing
 		width: 100%;
+		// Spaging
+		gap: 1rem;
+		// Typography
+		text-align: center;
+
 		.color-item {
+			// Sizing
 			width: 6rem;
+
 			.color-name {
+				// Sizing
+				width: 6rem;
+				// Typography
+				line-height: 2rem;
 				white-space: nowrap;
 				text-overflow: ellipsis;
-				width: 6rem;
-				line-height: 2rem;
 			}
 			.shades {
+				// Spacing
 				gap: 0.125rem;
+
 				.shade-container {
-					width: 6rem;
-					height: 2.5rem;
+					// Layout
 					justify-content: center;
 					align-items: center;
-					cursor: pointer;
+					// Sizing
+					width: 6rem;
+					height: 2.5rem;
+					// Interactivity
+					// Border
 					border-radius: 0.25rem;
+					cursor: pointer;
+
 					.shade {
+						// Layout
 						justify-content: center;
 						align-items: center;
+						// Sizing
 						width: 5.75rem;
 						height: 2.25rem;
+						// Border
 						border-radius: 0.25rem;
+						// Animation
+						transition: border 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
 					}
 				}
 			}
 		}
-	}
-}
-
-.color-wrapper {
-	position: relative;
-
-	.color-input {
-		border-radius: 50%;
-		cursor: pointer;
-		margin: 0 auto;
-		width: 2rem;
-		height: 2rem;
-		border-width: 1px;
-		border-style: solid;
-		border-color: inherit;
-	}
-	.popover {
-		position: absolute;
-		top: calc(100% + 8px);
-		// bottom: 0;
-		left: 0;
-		right: 0;
-
-		// left: 50%;
-		// right: 50%;
-		z-index: 2;
-	}
-	.cover {
-		background-color: #fff;
 	}
 }
