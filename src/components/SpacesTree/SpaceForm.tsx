@@ -1,48 +1,84 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, Box, TextField, Button, Typography, Fade, Backdrop, FormControlLabel, Checkbox, Stack } from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
 import { useSpaces } from '../../contexts/SpaceContext';
 import { Space } from '../../contexts/SpaceContext';
 import ColorPicker from '../Forms/ColorPicker';
 import IconPicker from '../Forms/IconPicker';
 import '../../styles/components/SpaceForm.scss';
-
-// const modalStyle = {
-// 	position: 'absolute' as 'absolute',
-// 	top: '50%',
-// 	left: '50%',
-// 	transform: 'translate(-50%, -50%)',
-// 	width: 400,
-// 	bgcolor: 'background.paper',
-// 	boxShadow: 24,
-// 	p: 4,
-// 	borderRadius: '8px',
-// };
+import { useAlerts } from '../../contexts/AlertContext';
+// import IconUploader from '../Forms/IconUploader';
 
 interface SpaceFormProps {
 	open: boolean;
 	handleClose: () => void;
+	space?: Space | null;
 	parentSpace?: Space | null;
 }
 
-const SpaceForm = ({ open, handleClose, parentSpace }: SpaceFormProps) => {
-	const { addSpace } = useSpaces();
-	const [name, setName] = useState('');
-	const [professional, setProfessional] = useState(false);
-	const [color, setColor] = useState<string | undefined>(undefined);
-	const [icon, setIcon] = useState<string | undefined>(undefined);
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		await addSpace({
-			name,
-			status: 'open',
-			professional,
-			color,
-			icon,
-			parent: parentSpace || null,
-		});
+const SpaceForm = ({ open, handleClose, space, parentSpace }: SpaceFormProps) => {
+	const { addSpace, updateSpace, loading } = useSpaces();
+	const [name, setName] = useState(space ? space.name : '');
+	const [professional, setProfessional] = useState(space ? space.professional : false);
+	const [color, setColor] = useState<string | undefined>(space ? space.color ?? undefined : undefined);
+	const [icon, setIcon] = useState<string | undefined>(space ? space.icon ?? undefined : undefined);
+	// const [personalizedIcon, setPersonalizedIcon] = useState<string | undefined>(space ? space.personalizedIcon : undefined);
+	const { showAlert } = useAlerts();
+	const closeModal = () => {
+		handleClose();
 		setName('');
 		setProfessional(false);
-		handleClose();
+		setColor(undefined);
+		setIcon(undefined);
+	};
+
+	useEffect(() => {
+		if (space) {
+			setName(space.name);
+			setProfessional(space.professional);
+			setColor(space.color ?? undefined);
+			setIcon(space.icon ?? undefined);
+		} else {
+			setName('');
+			setProfessional(false);
+			setColor(undefined);
+			setIcon(undefined);
+		}
+	}, [space]);
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (space) {
+			const { errors } = await updateSpace({
+				variables: {
+					id: space.id,
+					name,
+					professional,
+					color,
+					icon,
+				},
+			});
+			if (errors) {
+				showAlert({ severity: 'error', message: "Une erreur est survenue lors de la mise à jour de l'espace.", date: Date.now().toString() });
+			} else {
+				showAlert({ severity: 'success', message: "L'espace a été mis à jour avec succès.", date: Date.now().toString() });
+				closeModal();
+			}
+		} else {
+			const { errors } = await addSpace({
+				variables: {
+					name,
+					status: 'open',
+					professional,
+					color,
+					icon,
+					parent: parentSpace?.id || null,
+				},
+			});
+			if (!errors) {
+				closeModal();
+			}
+		}
 	};
 
 	return (
@@ -63,7 +99,7 @@ const SpaceForm = ({ open, handleClose, parentSpace }: SpaceFormProps) => {
 						variant="h6"
 						component="h2"
 					>
-						{parentSpace ? `Ajouter un sous-espace à ${parentSpace.name}` : 'Ajouter un espace'}
+						{space ? `Modifier l'espace ${space.name}` : parentSpace ? `Ajouter un sous-espace à ${parentSpace.name}` : 'Ajouter un espace'}
 					</Typography>
 					<form
 						onSubmit={handleSubmit}
@@ -77,21 +113,21 @@ const SpaceForm = ({ open, handleClose, parentSpace }: SpaceFormProps) => {
 							required
 						/>
 
-						<FormControlLabel
-							control={
-								<Checkbox
-									checked={parentSpace ? parentSpace.professional : professional}
-									onChange={(e) => setProfessional(e.target.checked)}
-									disabled={!!parentSpace}
-								/>
-							}
-							label="Professionnel"
-						/>
-
 						<Stack
 							id="pickers"
 							direction="row"
 						>
+							<FormControlLabel
+								control={
+									<Checkbox
+										checked={parentSpace ? parentSpace.professional : professional}
+										onChange={(e) => setProfessional(e.target.checked)}
+										disabled={!!parentSpace || !!space?.parent}
+									/>
+								}
+								label="Professionnel"
+								className="checkbox-label"
+							/>
 							<ColorPicker
 								color={color}
 								onColorChange={(newColor) => setColor(newColor)}
@@ -101,12 +137,16 @@ const SpaceForm = ({ open, handleClose, parentSpace }: SpaceFormProps) => {
 								icon={icon}
 								onIconChange={(newIcon) => setIcon(newIcon)}
 							/>
+
+							{/* <IconUploader
+								icon={icon}
+								setIcon={(newIcon) => setIcon(newIcon)}
+							></IconUploader> */}
 						</Stack>
 
-						<Box
-							display="flex"
+						<Stack
+							direction="row"
 							justifyContent="flex-end"
-							mt={2}
 						>
 							<Button
 								onClick={handleClose}
@@ -117,12 +157,13 @@ const SpaceForm = ({ open, handleClose, parentSpace }: SpaceFormProps) => {
 							</Button>
 							<Button
 								type="submit"
-								variant="contained"
-								color="primary"
+								loading={loading}
+								loadingPosition="end"
+								startIcon={<SaveIcon />}
 							>
-								Ajouter
+								{space ? 'Enregistrer' : 'Ajouter'}
 							</Button>
-						</Box>
+						</Stack>
 					</form>
 				</Box>
 			</Fade>

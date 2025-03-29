@@ -1,0 +1,24 @@
+.space-header {
+	// Layout
+	// justify-content: center;
+	align-items: center;
+	// Spacing
+	gap: 1rem;
+
+	.space-icon {
+		// Layout
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		// Sizing
+		width: 2rem;
+		height: 2rem;
+		// Border
+		border-radius: 50%;
+		svg {
+			// Sizing
+			width: 1.125rem;
+			height: 1.125rem;
+		}
+	}
+}

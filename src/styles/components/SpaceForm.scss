@@ -25,6 +25,10 @@
 				display: flex;
 				// Spacing
 				gap: 2rem;
+
+				.checkbox-label {
+					margin-right: 0;
+				}
 			}
 		}
 	}

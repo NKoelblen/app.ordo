@@ -4,6 +4,8 @@
 	// Spacing
 	gap: 0.5rem;
 	.picker-input {
+		// Sizing
+		box-sizing: border-box;
 		// Spacing
 		padding: 0.25rem;
 	}

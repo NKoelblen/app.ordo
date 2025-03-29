@@ -1,11 +1,19 @@
 import React, { useEffect, useMemo, useRef, useState, CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 
-import { Menu, MenuItem, ListItemIcon, ListItemText, IconButton, Box, Checkbox, FormControlLabel, Divider } from '@mui/material';
+import { Menu, MenuItem, ListItemIcon, ListItemText, IconButton, Box, Divider, CircularProgress } from '@mui/material';
 import { RichTreeView, TreeItem2, TreeItem2Label, TreeItem2Props, TreeItem2LabelInput, UseTreeItem2LabelSlotOwnProps } from '@mui/x-tree-view';
 import { useTreeItem2Utils } from '@mui/x-tree-view/hooks';
-import { MoreHoriz as MoreHorizIcon, Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, Archive as ArchiveIcon, Unarchive as UnarchiveIcon } from '@mui/icons-material';
-
+import {
+	MoreHoriz as MoreHorizIcon,
+	Add as AddIcon,
+	Delete as DeleteIcon,
+	Edit as EditIcon,
+	Archive as ArchiveIcon,
+	Unarchive as UnarchiveIcon,
+	Settings as SettingsIcon,
+} from '@mui/icons-material';
+import * as MuiIcons from '@mui/icons-material';
 import {
 	DndContext,
 	closestCenter,
@@ -32,13 +40,17 @@ import '../../styles/components/TreeItem.scss';
 import { useSpaces, Space } from '../../contexts/SpaceContext';
 import SpaceForm from './SpaceForm';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAlerts } from '../../contexts/AlertContext';
 
 const SpacesTree = () => {
-	const { spaces, setStatusFilter, updateName, updateProfessional, updateStatus, updateParent, deleteSpace } = useSpaces();
+	const { spaces, setStatusFilter, updateSpace, deleteSpace, loading } = useSpaces();
 	const [showArchived, setShowArchived] = useState(false);
+	const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
 	const [parentSpace, setParentSpace] = useState<Space | null>(null);
+
 	const navigate = useNavigate();
 	const location = useLocation();
+	const { showAlert } = useAlerts();
 
 	// Drag and drop
 	const initialItems = useMemo(() => {
@@ -152,13 +164,19 @@ const SpacesTree = () => {
 	function handleDragOver({ over }: DragOverEvent) {
 		setOverId(over?.id ?? null);
 	}
-	function handleDragEnd({ active, over }: DragEndEvent) {
-		resetState();
-
+	async function handleDragEnd({ active, over }: DragEndEvent) {
 		if (projected && over) {
 			const { parentId } = projected;
-			updateParent(String(active.id), parentId);
+			const { errors } = await updateSpace({
+				variables: { id: String(active.id), parent: parentId },
+			});
+			if (errors) {
+				showAlert({ severity: 'error', message: "Une erreur est survenue lors de la mise à jour de l'arborescence.", date: Date.now().toString() });
+			} else {
+				showAlert({ severity: 'success', message: "L'arborescence a été mise à jour avec succès.", date: Date.now().toString() });
+			}
 		}
+		resetState();
 	}
 	function resetState() {
 		setOverId(null);
@@ -273,6 +291,8 @@ const SpacesTree = () => {
 	// Tree
 	function CustomLabel({ space, editable, editing, children, toggleItemEditing, onCollapse, collapsed, ...other }: CustomLabelProps) {
 		const id = space.id.split('/').pop();
+		const IconComponent = (MuiIcons as any)[space.icon || ''];
+
 		return (
 			<TreeItem2Label
 				{...other}
@@ -287,8 +307,10 @@ const SpacesTree = () => {
 				)}
 				<Box
 					className="space-icon"
-					style={{ '--background-color': space.color } as React.CSSProperties}
-				/>
+					sx={{ color: space.color }}
+				>
+					{space.icon ? <IconComponent /> : space.label.charAt(0).toUpperCase()}
+				</Box>
 
 				<Link
 					to={`/space/${id}`}
@@ -349,30 +371,43 @@ const SpacesTree = () => {
 							<ListItemText>Renommer</ListItemText>
 						</MenuItem>,
 						<MenuItem
-							key={`update-space-professional-${space.id}`}
-							className="menu-item-checkbox"
+							key={`update-space-${space.id}`}
+							onClick={() => {
+								setSelectedSpace(() => spaces.find((selectedSpace) => selectedSpace.id === space.id) || null);
+								setModalOpen(true);
+								handleMenuClose();
+							}}
 						>
-							<FormControlLabel
-								control={
-									<Checkbox
-										className="menu-item-checkbox-input"
-										checked={space.professional || false}
-										onChange={(_, checked) => {
-											updateProfessional(space.id, checked);
-											handleMenuClose();
-										}}
-										disabled={space.parentId !== null}
-									/>
-								}
-								label="Professionnel"
-							/>
+							<ListItemIcon>
+								<SettingsIcon />
+							</ListItemIcon>
+							<ListItemText>Paramètres</ListItemText>
 						</MenuItem>,
 						<Divider key={`divider-${space.id}`} />,
 					]}
 					<MenuItem
 						key={`archive-space-${space.id}`}
-						onClick={() => {
-							updateStatus(space.id, space.status === 'open' ? 'archived' : 'open');
+						onClick={async () => {
+							const { errors } = await updateSpace({
+								variables: {
+									id: space.id,
+									status: space.status === 'open' ? 'archived' : 'open',
+								},
+							});
+							if (errors) {
+								showAlert({
+									severity: 'error',
+									message: `Une erreur est survenue lors de ${space.status === 'open' ? "l'archivage" : 'la restauration'} de l'espace.`,
+									date: Date.now().toString(),
+								});
+							} else {
+								showAlert({
+									severity: 'success',
+									message: `L'espace a été ${space.status === 'open' ? 'archivé' : 'restauré'} avec succès.`,
+									date: Date.now().toString(),
+								});
+							}
+
 							handleMenuClose();
 						}}
 					>
@@ -383,7 +418,7 @@ const SpacesTree = () => {
 						key={`delete-space-${space.id}`}
 						onClick={() => {
 							confirm('Êtes-vous sûr de vouloir supprimer cet espace ?');
-							deleteSpace(space.id);
+							deleteSpace({ variables: { id: space.id } });
 							handleMenuClose();
 							const currentSpaceId = location.pathname.split('/').pop();
 							if (space.id === `/api/spaces/${currentSpaceId}`) {
@@ -413,7 +448,7 @@ const SpacesTree = () => {
 			</Box>
 		);
 	}
-	const CustomTreeItem = React.forwardRef(function CustomTreeItem(props: TreeItem2Props, ref) {
+	const CustomTreeItem = React.forwardRef(function CustomTreeItem(props: TreeItem2Props, _) {
 		const space = flattenedItems.find((space) => space.id === props.itemId);
 		if (!space) return null;
 
@@ -548,18 +583,31 @@ const SpacesTree = () => {
 						slots={{ item: CustomTreeItem }}
 						isItemEditable={(item) => Boolean(item?.editable)}
 						experimentalFeatures={{ labelEditing: true }}
-						onItemLabelChange={(itemId, label) => updateName(itemId, label)}
+						onItemLabelChange={async (itemId, label) => {
+							const { errors } = await updateSpace({
+								variables: { id: itemId, name: label },
+							});
+							if (errors) {
+								showAlert({ severity: 'error', message: "Une erreur est survenue lors de la mise à jour du nom de l'espace.", date: Date.now().toString() });
+							} else {
+								showAlert({ severity: 'success', message: "L'espace a été renomé avec succès.", date: Date.now().toString() });
+							}
+						}}
 					/>
 					{createPortal(<DragOverlay dropAnimation={dropAnimationConfig} />, document.body)}
 				</SortableContext>
 			</DndContext>
 
+			{loading && spaces.length === 0 && <CircularProgress className="loading" />}
+
 			<SpaceForm
 				open={modalOpen}
 				handleClose={() => {
 					setModalOpen(false);
+					setSelectedSpace(null);
 					setParentSpace(null);
 				}}
+				space={selectedSpace}
 				parentSpace={parentSpace}
 			/>
 		</>

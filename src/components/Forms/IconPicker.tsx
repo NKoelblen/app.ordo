@@ -9,7 +9,7 @@ interface IconPickerProps {
 	onIconChange: (icon: string) => void;
 }
 const IconPicker = ({ icon, onIconChange }: IconPickerProps) => {
-	const IconComponent = (MuiIcons as any)[icon || 'EmojiEmotions'];
+	const IconComponent = (MuiIcons as any)[icon || 'EmojiSymbols'];
 	const [search, setSearch] = useState('');
 	const [page, setPage] = useState(1);
 	const iconsPerPage = 50;

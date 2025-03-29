@@ -1,16 +1,16 @@
 import { useParams } from 'react-router-dom';
 import { useSpaces } from '../contexts/SpaceContext';
-import { useEffect } from 'react';
+import { Box, Stack, useTheme } from '@mui/material';
+import * as MuiIcons from '@mui/icons-material';
+import { getContrastColor } from '../utilities';
+import '../styles/pages/SingleSpace.scss';
 
 const SingleSpace = () => {
 	const { id } = useParams<{ id: string }>();
-	const { space, getSpace } = useSpaces();
-
-	useEffect(() => {
-		if (id) {
-			getSpace(`api/spaces/${id}`);
-		}
-	}, [id, getSpace]);
+	const { spaces } = useSpaces();
+	const space = spaces.find((space) => space.id === id);
+	const IconComponent = space?.icon ? (MuiIcons as any)[space.icon] : null;
+	const theme = useTheme();
 
 	if (!space) {
 		return <p>Chargement...</p>;
@@ -18,7 +18,22 @@ const SingleSpace = () => {
 
 	return (
 		<>
-			<h1>Bienvenue sur l'espace {space.name} !</h1>
+			<Stack
+				className="space-header"
+				direction="row"
+			>
+				<Box
+					className="space-icon"
+					style={{ '--background-color': space.color } as React.CSSProperties}
+					sx={{
+						backgroundColor: space.color,
+						color: space.color ? getContrastColor(space.color, theme) : 'inherit',
+					}}
+				>
+					{space.icon ? <IconComponent /> : space.name.charAt(0).toUpperCase()}
+				</Box>
+				<h1>{space.name}</h1>
+			</Stack>
 			<p>Ceci est le contenu principal de l'espace.</p>
 		</>
 	);

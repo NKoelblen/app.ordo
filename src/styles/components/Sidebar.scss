@@ -13,6 +13,9 @@
 		max-width: 364px;
 		box-sizing: border-box;
 	}
+	.loading {
+		margin: 0 auto;
+	}
 	#sidebar-title {
 		// Layout
 		display: block;
@@ -80,15 +83,24 @@
 			color: inherit;
 		}
 		.space-icon {
+			// Layout
+			display: flex;
+			justify-content: center;
+			align-items: center;
 			// Sizing
-			height: 0.75rem;
-			width: 0.75rem;
+			height: 1.25rem;
+			width: 1.25rem;
 			// Spacing
-			margin: 0.375rem;
+			margin: 0.125rem 0.25rem;
 			// Background
 			background-color: var(--background-color);
-			// Border
-			border-radius: 50%;
+			// Typography
+			font-size: 1rem;
+
+			svg {
+				width: 1.25rem;
+				height: 1.25rem;
+			}
 		}
 
 		.collapse,
@@ -110,7 +122,7 @@
 			// Layout
 			position: absolute;
 			top: 50%;
-			left: 0.25rem;
+			left: 0.375rem;
 			// Effects
 			transform: translateY(-50%);
 			z-index: 2;

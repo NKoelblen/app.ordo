@@ -1,11 +1,12 @@
 import { Grid2 as Grid, Stack, Typography, useTheme } from '@mui/material';
 import InvertColorsIcon from '@mui/icons-material/InvertColors';
-import '../../styles/components/colorPicker.scss';
+import { getContrastColor } from '../../utilities';
 import Picker from './Picker';
+import '../../styles/components/colorPicker.scss';
 
 interface ColorPickerProps {
 	color: string | undefined;
-	onColorChange: (color: string) => void; // Ajoutez cette prop
+	onColorChange: (color: string) => void;
 }
 const ColorPicker = ({ color, onColorChange }: ColorPickerProps) => {
 	const colorValues = {
@@ -144,30 +145,13 @@ const ColorPicker = ({ color, onColorChange }: ColorPickerProps) => {
 		},
 	};
 	const theme = useTheme();
-	function getContrastColor(hexColor: string): string {
-		const color = hexColor.replace('#', '');
-
-		const r = parseInt(color.substring(0, 2), 16);
-		const g = parseInt(color.substring(2, 4), 16);
-		const b = parseInt(color.substring(4, 6), 16);
-
-		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-		return luminance > 0.5
-			? theme.palette.mode === 'light'
-				? theme.palette.text.primary
-				: theme.palette.background.default
-			: theme.palette.mode === 'light'
-			? theme.palette.background.default
-			: theme.palette.text.primary;
-	}
 
 	return (
 		<Picker
 			className="color-picker"
 			label="Couleur"
 			icon={<InvertColorsIcon />}
-			sx={{ backgroundColor: color, border: `1px solid ${theme.palette.divider}`, color: color ? getContrastColor(color) : 'inherit' }}
+			sx={{ backgroundColor: color, border: `1px solid ${theme.palette.divider}`, color: color ? getContrastColor(color, theme) : 'inherit' }}
 		>
 			<Grid
 				container
@@ -192,9 +176,9 @@ const ColorPicker = ({ color, onColorChange }: ColorPickerProps) => {
 								>
 									<Stack
 										className="shade"
-										sx={{ border: `1px solid ${color === shade ? getContrastColor(shade) : 'transparent'}` }}
+										sx={{ border: `1px solid ${color === shade ? getContrastColor(shade, theme) : 'transparent'}` }}
 									>
-										<Typography sx={{ color: getContrastColor(shade) }}>{shade}</Typography>
+										<Typography sx={{ color: getContrastColor(shade, theme) }}>{shade}</Typography>
 									</Stack>
 								</Stack>
 							))}

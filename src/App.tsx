@@ -15,7 +15,6 @@ const App = () => {
 		setIsDarkMode((prevMode) => !prevMode);
 	};
 	const theme = isDarkMode ? darkTheme : lightTheme;
-	console.log(theme);
 
 	return (
 		<ThemeProvider theme={theme}>

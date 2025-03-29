@@ -1,6 +1,10 @@
-.picker-container .color-input:hover {
-	// Typography
-	color: inherit;
+.picker-container.color-picker .picker-input {
+	// Spacing
+	padding: 3px;
+	&:hover {
+		// Typography
+		color: inherit;
+	}
 }
 .picker.color-picker {
 	// Sizing
