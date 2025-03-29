@@ -4,6 +4,13 @@ body {
 	// Spacing
 	padding-left: 232px;
 
+	&:has(.ghost) {
+		* {
+			// Interactivity
+			cursor: grabbing;
+		}
+	}
+
 	#root {
 		// Spacing
 		margin: 0 auto;
@@ -19,5 +26,12 @@ body {
 	p {
 		// Spacing
 		margin: 0;
+	}
+
+	.alert {
+		// Sizing
+		min-width: 364px;
+		width: fit-content;
+		max-width: 680px;
 	}
 }

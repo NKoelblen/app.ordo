@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react';
-import { Alert, IconButton } from '@mui/material';
+import { Alert, Collapse, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 // Définition du type Space
@@ -22,11 +22,23 @@ const AlertsContext = createContext<AlertsContextType | undefined>(undefined);
 // Provider du contexte
 export const AlertsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [alerts, setAlerts] = useState<AlertType[]>([]);
+	const [displayed, setdisplayed] = useState<string[]>([]);
 
 	const showAlert = (alert: AlertType) => {
+		setTimeout(() => {
+			setdisplayed((prevDisplayed) => [...prevDisplayed, alert.date]);
+		}, 300);
 		setAlerts((prevAlerts) => [...prevAlerts, alert]);
-		setTimeout(() => removeAlert(alert.date), 3000);
+		setTimeout(() => {
+			handleRemoveWithTransition(alert.date);
+		}, 3000);
 	};
+
+	const handleRemoveWithTransition = (date: string) => {
+		setdisplayed((prevDisplayed) => prevDisplayed.filter((alert) => alert !== date));
+		setTimeout(() => removeAlert(date), 300); // 300ms correspond à la durée de la transition
+	};
+
 	const removeAlert = (date: string) => {
 		setAlerts((prevAlerts) => prevAlerts.filter((alert) => alert.date !== date));
 	};
@@ -34,25 +46,31 @@ export const AlertsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 	return (
 		<AlertsContext.Provider value={{ alerts, showAlert, removeAlert }}>
 			{alerts.map((alert) => (
-				<Alert
+				<Collapse
 					key={alert.date}
-					variant="filled"
-					severity={alert.severity}
-					action={
-						<IconButton
-							aria-label="close"
-							color="inherit"
-							size="small"
-							onClick={() => {
-								removeAlert(alert.date);
-							}}
-						>
-							<CloseIcon fontSize="inherit" />
-						</IconButton>
-					}
+					in={displayed.includes(alert.date)}
 				>
-					{alert.message}
-				</Alert>
+					<Alert
+						className="alert"
+						key={alert.date}
+						variant="filled"
+						severity={alert.severity}
+						action={
+							<IconButton
+								aria-label="close"
+								color="inherit"
+								size="small"
+								onClick={() => {
+									handleRemoveWithTransition(alert.date);
+								}}
+							>
+								<CloseIcon fontSize="inherit" />
+							</IconButton>
+						}
+					>
+						{alert.message}
+					</Alert>
+				</Collapse>
 			))}
 			{children}
 		</AlertsContext.Provider>

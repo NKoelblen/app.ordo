@@ -155,8 +155,6 @@ const SpacesTree = () => {
 	function handleDragStart({ active: { id: activeId } }: DragStartEvent) {
 		setActiveId(activeId);
 		setOverId(activeId);
-
-		document.body.style.setProperty('cursor', 'grabbing');
 	}
 	function handleDragMove({ delta }: DragMoveEvent) {
 		setOffsetLeft(delta.x);
