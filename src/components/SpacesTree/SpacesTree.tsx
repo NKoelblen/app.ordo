@@ -42,6 +42,7 @@ import SpaceForm from './SpaceForm';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAlerts } from '../../contexts/AlertContext';
 import { ReactSVG } from 'react-svg';
+import GlobalSettingsModal from '../GlobalSettingsModal';
 
 const SpacesTree = () => {
 	const { spaces, setStatusFilter, updateSpace, deleteSpace, loading } = useSpaces();
@@ -287,7 +288,8 @@ const SpacesTree = () => {
 	};
 
 	// Modal
-	const [modalOpen, setModalOpen] = useState(false);
+	const [spaceModalOpen, setSpaceModalOpen] = useState(false);
+	const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
 	// Tree
 	function CustomLabel({ space, editable, editing, children, toggleItemEditing, onCollapse, collapsed, ...other }: CustomLabelProps) {
@@ -356,7 +358,7 @@ const SpacesTree = () => {
 							key={`add-child-space-to-${space.id}`}
 							onClick={() => {
 								setParentSpace(() => spaces.find((parentSpace) => parentSpace.id === space.id) || null);
-								setModalOpen(true);
+								setSpaceModalOpen(true);
 								handleMenuClose();
 							}}
 						>
@@ -381,7 +383,7 @@ const SpacesTree = () => {
 							key={`update-space-${space.id}`}
 							onClick={() => {
 								setSelectedSpace(() => spaces.find((selectedSpace) => selectedSpace.id === space.id) || null);
-								setModalOpen(true);
+								setSpaceModalOpen(true);
 								handleMenuClose();
 							}}
 						>
@@ -546,7 +548,7 @@ const SpacesTree = () => {
 						key="add-space"
 						onClick={() => {
 							setParentSpace(null);
-							setModalOpen(true);
+							setSpaceModalOpen(true);
 							handleMenuClose();
 						}}
 					>
@@ -554,6 +556,19 @@ const SpacesTree = () => {
 							<AddIcon />
 						</ListItemIcon>
 						<ListItemText>Ajouter un espace</ListItemText>
+					</MenuItem>
+					<MenuItem
+						key="global-settings"
+						onClick={() => {
+							// setParentSpace(null);
+							setSettingsModalOpen(true);
+							handleMenuClose();
+						}}
+					>
+						<ListItemIcon>
+							<SettingsIcon />
+						</ListItemIcon>
+						<ListItemText>Paramètres</ListItemText>
 					</MenuItem>
 					<MenuItem
 						key="show-archived-spaces"
@@ -608,14 +623,19 @@ const SpacesTree = () => {
 			{loading && spaces.length === 0 && <CircularProgress className="loading" />}
 
 			<SpaceForm
-				open={modalOpen}
+				open={spaceModalOpen}
 				handleClose={() => {
-					setModalOpen(false);
+					setSpaceModalOpen(false);
 					setSelectedSpace(null);
 					setParentSpace(null);
 				}}
 				space={selectedSpace}
 				parentSpace={parentSpace}
+			/>
+
+			<GlobalSettingsModal
+				open={settingsModalOpen}
+				handleClose={() => setSettingsModalOpen(false)}
 			/>
 		</>
 	);

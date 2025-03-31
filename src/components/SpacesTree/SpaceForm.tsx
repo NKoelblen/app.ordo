@@ -7,6 +7,7 @@ import ColorPicker from '../Forms/ColorPicker';
 import IconPicker from '../Forms/IconPicker';
 import '../../styles/components/SpaceForm.scss';
 import { useAlerts } from '../../contexts/AlertContext';
+import SettingsTabs from '../SettingsTabs';
 
 interface SpaceFormProps {
 	open: boolean;
@@ -147,6 +148,8 @@ const SpaceForm = ({ open, handleClose, space, parentSpace }: SpaceFormProps) =>
 								onIconUpload={(newIcon) => setPersonalizedIconFile(newIcon)}
 							/>
 						</Stack>
+
+						{space && <SettingsTabs space={space} />}
 
 						<Stack
 							direction="row"

@@ -8,6 +8,7 @@ import { SpaceProvider } from './contexts/SpaceContext';
 import App from './App';
 import Home from './pages/Home';
 import SingleSpace from './pages/SingleSpace';
+import { MemberProvider } from './contexts/MemberContext';
 
 const rootElement = document.getElementById('root') as HTMLElement;
 
@@ -19,19 +20,21 @@ root.render(
 			<ApolloProvider client={apolloClient}>
 				<AlertsProvider>
 					<SpaceProvider>
-						<Routes>
-							<Route element={<App />}>
-								<Route
-									path="/"
-									element={<Home />}
-								/>
+						<MemberProvider>
+							<Routes>
+								<Route element={<App />}>
+									<Route
+										path="/"
+										element={<Home />}
+									/>
 
-								<Route
-									path="/space/:id"
-									element={<SingleSpace />}
-								/>
-							</Route>
-						</Routes>
+									<Route
+										path="/space/:id"
+										element={<SingleSpace />}
+									/>
+								</Route>
+							</Routes>
+						</MemberProvider>
 					</SpaceProvider>
 				</AlertsProvider>
 			</ApolloProvider>
