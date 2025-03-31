@@ -3,13 +3,17 @@ import * as MuiIcons from '@mui/icons-material';
 import '../../styles/components/iconPicker.scss';
 import Picker from './Picker';
 import { useMemo, useState } from 'react';
+import IconUploader from './IconUploader';
+import { ReactSVG } from 'react-svg';
 
 interface IconPickerProps {
-	icon: string | undefined;
-	onIconChange: (icon: string) => void;
+	icon: string | File | null | undefined;
+	isPersonalizedIcon: boolean;
+	onIconChange: (icon: string | undefined) => void;
+	onIconUpload: (icon: File | null) => void;
 }
-const IconPicker = ({ icon, onIconChange }: IconPickerProps) => {
-	const IconComponent = (MuiIcons as any)[icon || 'EmojiSymbols'];
+const IconPicker = ({ icon, isPersonalizedIcon, onIconChange, onIconUpload }: IconPickerProps) => {
+	const IconComponent = (MuiIcons as any)[(icon as string) || 'EmojiSymbols'];
 	const [search, setSearch] = useState('');
 	const [page, setPage] = useState(1);
 	const iconsPerPage = 50;
@@ -27,12 +31,23 @@ const IconPicker = ({ icon, onIconChange }: IconPickerProps) => {
 	);
 	const totalPages = Math.ceil(iconNames.length / iconsPerPage);
 	const paginatedIcons = iconNames.slice((page - 1) * iconsPerPage, page * iconsPerPage);
+	const [personalizedIconFile, setPersonalizedIconFile] = useState<File | string | null | undefined>(isPersonalizedIcon ? icon : undefined);
 
 	return (
 		<Picker
 			className="icon-picker"
 			label="Icône"
-			icon={<IconComponent />}
+			icon={
+				isPersonalizedIcon ? (
+					typeof icon === 'string' ? (
+						<ReactSVG src={'https://localhost' + icon} />
+					) : (
+						<ReactSVG src={URL.createObjectURL(icon as File)} />
+					)
+				) : (
+					<IconComponent />
+				)
+			}
 		>
 			<TextField
 				className="icon-search"
@@ -58,8 +73,9 @@ const IconPicker = ({ icon, onIconChange }: IconPickerProps) => {
 								<IconButton
 									onClick={() => {
 										onIconChange(iconName);
+										setPersonalizedIconFile(null);
+										onIconUpload(null);
 									}}
-									// size="small"
 								>
 									<IconComponent />
 								</IconButton>
@@ -73,9 +89,16 @@ const IconPicker = ({ icon, onIconChange }: IconPickerProps) => {
 					count={totalPages}
 					page={page}
 					onChange={(_, value) => setPage(value)}
-					// size="small"
 				/>
 			)}
+			<IconUploader
+				icon={personalizedIconFile}
+				onIconChange={(newIcon) => {
+					setPersonalizedIconFile(newIcon);
+					onIconUpload(newIcon);
+					onIconChange(undefined);
+				}}
+			></IconUploader>
 		</Picker>
 	);
 };

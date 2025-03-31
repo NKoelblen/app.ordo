@@ -41,6 +41,7 @@ import { useSpaces, Space } from '../../contexts/SpaceContext';
 import SpaceForm from './SpaceForm';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAlerts } from '../../contexts/AlertContext';
+import { ReactSVG } from 'react-svg';
 
 const SpacesTree = () => {
 	const { spaces, setStatusFilter, updateSpace, deleteSpace, loading } = useSpaces();
@@ -64,6 +65,7 @@ const SpacesTree = () => {
 				professional: space.professional,
 				color: space.color ?? null,
 				icon: space.icon ?? null,
+				personalizedIconUrl: space.personalizedIconUrl ?? null,
 				descendants: [],
 				editable: space.status === 'open',
 				collapsed: true,
@@ -220,6 +222,7 @@ const SpacesTree = () => {
 							professional: space.professional,
 							color: space.color ?? null,
 							icon: space.icon ?? null,
+							personalizedIconUrl: space.personalizedIconUrl ?? null,
 							descendants: [],
 							editable: space.status === 'open',
 							collapsed: collapsedState[space.id] ?? true,
@@ -307,7 +310,13 @@ const SpacesTree = () => {
 					className="space-icon"
 					sx={{ color: space.color }}
 				>
-					{space.icon ? <IconComponent /> : space.label.charAt(0).toUpperCase()}
+					{space.personalizedIconUrl ? (
+						<ReactSVG src={`https://localhost${space.personalizedIconUrl}`} />
+					) : space.icon ? (
+						<IconComponent />
+					) : (
+						space.label.charAt(0).toUpperCase()
+					)}
 				</Box>
 
 				<Link

@@ -10,6 +10,7 @@ export interface Space {
 	professional: boolean;
 	color?: string | null;
 	icon?: string | null;
+	personalizedIconUrl?: string | null;
 	parent?: Space | null;
 	status: 'open' | 'archived';
 }
@@ -41,6 +42,7 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 			professional
 			color
 			icon
+			personalizedIconUrl
 			status
 			parent {
 				id
@@ -85,13 +87,16 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 		}
 		if (spacesError) {
 			showAlert({ severity: 'error', message: 'Une erreur est survenue lors de la récupération des espaces.', date: Date.now().toString() });
+			console.error(spacesError);
 		}
 	}, [statusFilter, spacesLoading, spacesData, spacesError]);
 
 	// Ajouter un espace
 	const ADD_SPACE = gql`
-		mutation CreateSpace($name: String!, $status: String!, $professional: Boolean!, $color: String, $icon: String, $parent: String) {
-			createSpace(input: { name: $name, status: $status, professional: $professional, color: $color, icon: $icon, parent: $parent }) {
+		mutation CreateSpace($name: String!, $status: String!, $professional: Boolean!, $color: String, $icon: String, $personalizedIconFile: Upload, $parent: String) {
+			createSpace(
+				input: { name: $name, status: $status, professional: $professional, color: $color, icon: $icon, personalizedIconFile: $personalizedIconFile, parent: $parent }
+			) {
 				space {
 					...SpaceFields
 				}
@@ -121,8 +126,19 @@ export const SpaceProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 	// Modifier un espace
 	const UPDATE_SPACE = gql`
-		mutation UpdateSpace($id: ID!, $name: String, $status: String, $professional: Boolean, $color: String, $icon: String, $parent: String) {
-			updateSpace(input: { id: $id, name: $name, status: $status, professional: $professional, color: $color, icon: $icon, parent: $parent }) {
+		mutation UpdateSpace($id: ID!, $name: String, $status: String, $professional: Boolean, $color: String, $icon: String, $personalizedIconFile: Upload, $parent: String) {
+			updateSpace(
+				input: {
+					id: $id
+					name: $name
+					status: $status
+					professional: $professional
+					color: $color
+					icon: $icon
+					personalizedIconFile: $personalizedIconFile
+					parent: $parent
+				}
+			) {
 				space {
 					...SpaceFields
 				}

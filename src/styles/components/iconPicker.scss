@@ -1,7 +1,7 @@
 .picker.icon-picker {
 	// Sizing
 	width: 31.25rem;
-	height: 27rem;
+	height: 30.625rem;
 	> .MuiPopover-paper {
 		// Layout
 		display: flex;
@@ -63,6 +63,14 @@
 					}
 				}
 			}
+		}
+	}
+
+	.icon-uploader {
+		div,
+		svg {
+			width: 1.5rem;
+			height: 1.5rem;
 		}
 	}
 }

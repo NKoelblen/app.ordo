@@ -79,6 +79,7 @@ export function flatten(items: TreeItems, parentId: UniqueIdentifier | null = nu
 				professional: item.professional,
 				color: item.color,
 				icon: item.icon,
+				personalizedIconUrl: item.personalizedIconUrl,
 				status: item.status,
 				label: item.label,
 			},

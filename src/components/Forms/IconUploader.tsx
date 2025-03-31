@@ -2,10 +2,10 @@ import { IconButton, Stack, InputLabel } from '@mui/material';
 import { ReactSVG } from 'react-svg';
 
 interface IconUploaderProps {
-	icon: string | undefined;
-	setIcon: (icon: string) => void;
+	icon: File | String | null | undefined;
+	onIconChange: (icon: File) => void;
 }
-const IconUploader = ({ icon, setIcon }: IconUploaderProps) => {
+const IconUploader = ({ icon, onIconChange }: IconUploaderProps) => {
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (!file) return;
@@ -15,25 +15,29 @@ const IconUploader = ({ icon, setIcon }: IconUploaderProps) => {
 			return;
 		}
 
-		const reader = new FileReader();
-		reader.onload = (e) => {
-			const result = e.target?.result as string;
-			if (result.includes('<script') || result.includes('<foreignObject')) {
-				alert('Fichier SVG invalide.');
-				return;
-			}
-			setIcon(result);
-		};
-		reader.readAsDataURL(file);
+		onIconChange(file);
 	};
 
 	return (
-		<Stack direction="row">
+		<Stack
+			direction="row"
+			className="picker-container icon-uploader"
+		>
 			<InputLabel>Icône personnalisée</InputLabel>
-			<IconButton>
-				{icon ? <ReactSVG src={icon} /> : '🦆'}
+			<IconButton onClick={() => (document.querySelector('#icon-upload-input') as HTMLInputElement)?.click()}>
+				{icon ? (
+					typeof icon === 'string' ? (
+						<ReactSVG src={'https://localhost' + icon} /> // Affiche l'icône provenant de l'API
+					) : (
+						<ReactSVG src={URL.createObjectURL(icon as File)} /> // Affiche l'icône temporaire
+					)
+				) : (
+					'🦆'
+				)}
 				<input
+					id="icon-upload-input"
 					type="file"
+					accept=".svg"
 					onChange={handleFileUpload}
 					style={{
 						clip: 'rect(0 0 0 0)',

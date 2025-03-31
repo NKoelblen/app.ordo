@@ -8,7 +8,7 @@ import '../styles/pages/SingleSpace.scss';
 const SingleSpace = () => {
 	const { id } = useParams<{ id: string }>();
 	const { spaces } = useSpaces();
-	const space = spaces.find((space) => space.id === `/api/spaces/${id}`);
+	const space = spaces.find((space) => space.id === `/spaces/${id}`);
 	const IconComponent = space?.icon ? (MuiIcons as any)[space.icon] : null;
 	const theme = useTheme();
 

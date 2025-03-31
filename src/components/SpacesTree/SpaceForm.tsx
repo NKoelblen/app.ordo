@@ -7,7 +7,6 @@ import ColorPicker from '../Forms/ColorPicker';
 import IconPicker from '../Forms/IconPicker';
 import '../../styles/components/SpaceForm.scss';
 import { useAlerts } from '../../contexts/AlertContext';
-// import IconUploader from '../Forms/IconUploader';
 
 interface SpaceFormProps {
 	open: boolean;
@@ -22,7 +21,8 @@ const SpaceForm = ({ open, handleClose, space, parentSpace }: SpaceFormProps) =>
 	const [professional, setProfessional] = useState(space ? space.professional : false);
 	const [color, setColor] = useState<string | undefined>(space ? space.color ?? undefined : undefined);
 	const [icon, setIcon] = useState<string | undefined>(space ? space.icon ?? undefined : undefined);
-	// const [personalizedIcon, setPersonalizedIcon] = useState<string | undefined>(space ? space.personalizedIcon : undefined);
+	const [personalizedIconFile, setPersonalizedIconFile] = useState<File | string | null | undefined>(undefined);
+
 	const { showAlert } = useAlerts();
 	const closeModal = () => {
 		handleClose();
@@ -30,6 +30,7 @@ const SpaceForm = ({ open, handleClose, space, parentSpace }: SpaceFormProps) =>
 		setProfessional(false);
 		setColor(undefined);
 		setIcon(undefined);
+		setPersonalizedIconFile(undefined);
 	};
 
 	useEffect(() => {
@@ -38,11 +39,13 @@ const SpaceForm = ({ open, handleClose, space, parentSpace }: SpaceFormProps) =>
 			setProfessional(space.professional);
 			setColor(space.color ?? undefined);
 			setIcon(space.icon ?? undefined);
+			setPersonalizedIconFile(space.personalizedIconUrl ?? undefined);
 		} else {
 			setName('');
 			setProfessional(false);
 			setColor(undefined);
 			setIcon(undefined);
+			setPersonalizedIconFile(undefined);
 		}
 	}, [space]);
 
@@ -56,10 +59,13 @@ const SpaceForm = ({ open, handleClose, space, parentSpace }: SpaceFormProps) =>
 					professional,
 					color,
 					icon,
+					parent: space.parent?.id || null,
+					personalizedIconFile,
 				},
 			});
+
 			if (errors) {
-				showAlert({ severity: 'error', message: "Une erreur est survenue lors de la mise à jour de l'espace.", date: Date.now().toString() });
+				showAlert({ severity: 'error', message: "Erreur lors de la mise à jour de l'espace.", date: Date.now().toString() });
 			} else {
 				showAlert({ severity: 'success', message: "L'espace a été mis à jour avec succès.", date: Date.now().toString() });
 				closeModal();
@@ -73,6 +79,7 @@ const SpaceForm = ({ open, handleClose, space, parentSpace }: SpaceFormProps) =>
 					color,
 					icon,
 					parent: parentSpace?.id || null,
+					personalizedIconFile,
 				},
 			});
 			if (!errors) {
@@ -134,14 +141,11 @@ const SpaceForm = ({ open, handleClose, space, parentSpace }: SpaceFormProps) =>
 							/>
 
 							<IconPicker
-								icon={icon}
+								icon={personalizedIconFile ?? icon}
+								isPersonalizedIcon={Boolean(personalizedIconFile)}
 								onIconChange={(newIcon) => setIcon(newIcon)}
+								onIconUpload={(newIcon) => setPersonalizedIconFile(newIcon)}
 							/>
-
-							{/* <IconUploader
-								icon={icon}
-								setIcon={(newIcon) => setIcon(newIcon)}
-							></IconUploader> */}
 						</Stack>
 
 						<Stack

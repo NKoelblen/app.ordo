@@ -8,6 +8,7 @@ export interface TreeItem extends TreeViewBaseItem {
 	status: 'open' | 'archived';
 	color: string | null;
 	icon: string | null;
+	personalizedIconUrl: string | null;
 	descendants: TreeItem[];
 	collapsed: boolean;
 }
