@@ -18,7 +18,7 @@ const App = () => {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<CssBaseline />
+			<CssBaseline enableColorScheme />
 			<div
 				className={isDarkMode ? 'dark-mode' : 'light-mode'}
 				style={{ '--border-color': theme.palette.divider } as React.CSSProperties}

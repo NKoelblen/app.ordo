@@ -1,0 +1,66 @@
+.picker-container.color-picker .picker-input {
+	// Spacing
+	padding: 3px;
+	&:hover {
+		// Typography
+		color: inherit;
+	}
+}
+.picker.color-picker {
+	// Sizing
+	width: 32rem;
+	height: 19rem;
+
+	.color-grid {
+		// Sizing
+		width: 100%;
+		// Spaging
+		gap: 1rem;
+		// Typography
+		text-align: center;
+
+		.color-item {
+			// Sizing
+			width: 6rem;
+
+			.color-name {
+				// Sizing
+				width: 6rem;
+				// Typography
+				line-height: 2rem;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			.shades {
+				// Spacing
+				gap: 0.125rem;
+
+				.shade-container {
+					// Layout
+					justify-content: center;
+					align-items: center;
+					// Sizing
+					width: 6rem;
+					height: 2.5rem;
+					// Interactivity
+					// Border
+					border-radius: 0.25rem;
+					cursor: pointer;
+
+					.shade {
+						// Layout
+						justify-content: center;
+						align-items: center;
+						// Sizing
+						width: 5.75rem;
+						height: 2.25rem;
+						// Border
+						border-radius: 0.25rem;
+						// Animation
+						transition: border 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+					}
+				}
+			}
+		}
+	}
+}
