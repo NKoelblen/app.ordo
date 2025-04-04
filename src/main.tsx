@@ -9,6 +9,7 @@ import App from './App';
 import Home from './pages/Home';
 import SingleSpace from './pages/SingleSpace';
 import { MemberProvider } from './contexts/MemberContext';
+import { CategoryProvider } from './contexts/CategoryContext';
 
 const rootElement = document.getElementById('root') as HTMLElement;
 
@@ -21,19 +22,21 @@ root.render(
 				<AlertsProvider>
 					<SpaceProvider>
 						<MemberProvider>
-							<Routes>
-								<Route element={<App />}>
-									<Route
-										path="/"
-										element={<Home />}
-									/>
+							<CategoryProvider>
+								<Routes>
+									<Route element={<App />}>
+										<Route
+											path="/"
+											element={<Home />}
+										/>
 
-									<Route
-										path="/space/:id"
-										element={<SingleSpace />}
-									/>
-								</Route>
-							</Routes>
+										<Route
+											path="/space/:id"
+											element={<SingleSpace />}
+										/>
+									</Route>
+								</Routes>
+							</CategoryProvider>
 						</MemberProvider>
 					</SpaceProvider>
 				</AlertsProvider>

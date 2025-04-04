@@ -13,7 +13,7 @@ export default function CustomTabPanel(props: TabPanelProps) {
 	return (
 		<Box
 			role="tabpanel"
-			hidden={value !== index}
+			sx={{ display: value !== index ? 'none' : 'block' }}
 			id={`tabpanel-${index}`}
 			{...other}
 			className="tabpanel"

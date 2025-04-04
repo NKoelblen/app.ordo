@@ -71,8 +71,9 @@ const MembersList = ({ space }: MembersListProps) => {
 								size="small"
 								className="delete-button"
 								onClick={() => {
-									confirm('Êtes-vous sûr de vouloir supprimer ce membre ?');
-									deleteMember({ variables: { id: member.id } });
+									if (window.confirm('Êtes-vous sûr de vouloir supprimer ce membre ?')) {
+										deleteMember({ variables: { id: member.id } });
+									}
 								}}
 								color="inherit"
 							>
@@ -104,7 +105,7 @@ const MembersList = ({ space }: MembersListProps) => {
 				}}
 				member={selectedMember}
 				space={space}
-			></MemberForm>
+			/>
 		</Stack>
 	);
 };

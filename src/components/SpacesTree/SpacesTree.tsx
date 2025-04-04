@@ -426,8 +426,9 @@ const SpacesTree = () => {
 					<MenuItem
 						key={`delete-space-${space.id}`}
 						onClick={() => {
-							confirm('Êtes-vous sûr de vouloir supprimer cet espace ?');
-							deleteSpace({ variables: { id: space.id } });
+							if (window.confirm('Êtes-vous sûr de vouloir supprimer cet espace ?')) {
+								deleteSpace({ variables: { id: space.id } });
+							}
 							handleMenuClose();
 							const currentSpaceId = location.pathname.split('/').pop();
 							if (space.id === `/api/spaces/${currentSpaceId}`) {
