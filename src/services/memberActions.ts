@@ -1,10 +1,10 @@
-import { createContext, useState, useContext, useEffect } from 'react';
-import { useMutation, MutationFunctionOptions, OperationVariables, DefaultContext, ApolloCache, FetchResult, useQuery } from '@apollo/client';
+import { useState, useEffect } from 'react';
+import { useMutation, useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
-import { useAlerts } from './AlertContext';
-import { Space } from './SpaceContext';
+import { useAlerts } from '../contexts/AlertContext';
+import { Space } from './spaceActions';
 
-// Définition du type Space
+// Définition du type Member
 export interface Member {
 	id: string;
 	name: string;
@@ -14,22 +14,9 @@ export interface Member {
 	space?: Space | null;
 }
 
-// Type du contexte
-interface MemberContextType {
-	members: Member[];
-	addMember: (options?: MutationFunctionOptions<any, OperationVariables, DefaultContext, ApolloCache<any>> | undefined) => Promise<FetchResult<any>>;
-	updateMember: (options?: MutationFunctionOptions<any, OperationVariables, DefaultContext, ApolloCache<any>> | undefined) => Promise<FetchResult<any>>;
-	deleteMember: (options?: MutationFunctionOptions<any, OperationVariables, DefaultContext, ApolloCache<any>> | undefined) => Promise<FetchResult<any>>;
-	loading: boolean;
-}
-
-// Création du contexte
-const MemberContext = createContext<MemberContextType | undefined>(undefined);
-
-// Provider du contexte
-export const MemberProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const useMemberActions = () => {
 	const [members, setMembers] = useState<Member[]>([]);
-	const [loading, setLoading] = useState<boolean>(false);
+	const [memberLoading, setMemberLoading] = useState<boolean>(false);
 	const { showAlert } = useAlerts();
 
 	const MEMBER_FIELDS = gql`
@@ -68,10 +55,10 @@ export const MemberProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 	});
 	useEffect(() => {
 		if (membersLoading) {
-			setLoading(true);
+			setMemberLoading(true);
 		}
 		if (membersData || membersError) {
-			setLoading(false);
+			setMemberLoading(false);
 		}
 		if (membersData) {
 			setMembers(membersData.members.edges.map((edge: { node: Member }) => edge.node));
@@ -100,10 +87,10 @@ export const MemberProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 	});
 	useEffect(() => {
 		if (addMemberLoaging) {
-			setLoading(true);
+			setMemberLoading(true);
 		}
 		if (addMemberData || addMemberError) {
-			setLoading(false);
+			setMemberLoading(false);
 		}
 		if (addMemberData) {
 			showAlert({ severity: 'success', message: 'Le membre a bien été ajouté.', date: Date.now().toString() });
@@ -131,10 +118,10 @@ export const MemberProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 	});
 	useEffect(() => {
 		if (updateMemberLoaging) {
-			setLoading(true);
+			setMemberLoading(true);
 		}
 		if (updateMemberData || updateMemberError) {
-			setLoading(false);
+			setMemberLoading(false);
 		}
 	}, [updateMemberLoaging, updateMemberData, updateMemberError]);
 
@@ -153,10 +140,10 @@ export const MemberProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 	});
 	useEffect(() => {
 		if (deleteMemberLoaging) {
-			setLoading(true);
+			setMemberLoading(true);
 		}
 		if (deleteMemberData || deleteMemberError) {
-			setLoading(false);
+			setMemberLoading(false);
 		}
 		if (deleteMemberData) {
 			showAlert({ severity: 'success', message: 'Le membre a bien été supprimé.', date: Date.now().toString() });
@@ -166,14 +153,5 @@ export const MemberProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 		}
 	}, [deleteMemberLoaging, deleteMemberData, deleteMemberError]);
 
-	return <MemberContext.Provider value={{ members, addMember, updateMember, deleteMember, loading }}>{children}</MemberContext.Provider>;
-};
-
-// Hook pour utiliser le contexte
-export const useMembers = (): MemberContextType => {
-	const context = useContext(MemberContext);
-	if (!context) {
-		throw new Error("useMembers doit être utilisé à l'intérieur d'un MemberProvider");
-	}
-	return context;
+	return { members, addMember, updateMember, deleteMember, memberLoading };
 };

@@ -1,0 +1,49 @@
+.members-list {
+	align-items: center;
+	gap: 1rem 0.5rem;
+	flex-wrap: wrap;
+	.member-item {
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem;
+		border-radius: 0.25rem;
+		.member-icon {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			div,
+			svg {
+				width: 1.5rem;
+				height: 1.5rem;
+			}
+		}
+		.edit-button,
+		.delete-button {
+			padding: 0.25rem;
+			svg {
+				width: 1rem;
+				height: 1rem;
+			}
+		}
+	}
+}
+
+.picker.member-form {
+	width: 480px;
+
+	.modal-form-content {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+
+		form {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+
+			#pickers {
+				gap: 2rem;
+			}
+		}
+	}
+}

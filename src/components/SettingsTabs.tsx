@@ -35,13 +35,13 @@ const SettingsTabs = ({ space }: MSettingsTabsProps) => {
 			</Tabs>
 			<CustomTabPanel
 				value={value}
-				index={1}
+				index={0}
 			>
 				<MembersList space={space} />
 			</CustomTabPanel>
 			<CustomTabPanel
 				value={value}
-				index={0}
+				index={1}
 			>
 				<CategoriesList space={space} />
 			</CustomTabPanel>

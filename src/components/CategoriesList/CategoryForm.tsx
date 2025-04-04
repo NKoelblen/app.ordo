@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Box, TextField, Button, Typography, Stack, Popover, PopoverVirtualElement } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
-import { Space } from '../../contexts/SpaceContext';
+import { Space } from '../../services/spaceActions';
 import ColorPicker from '../Forms/ColorPicker';
 import IconPicker from '../Forms/IconPicker';
 import '../../styles/components/SpaceForm.scss';
 import { useAlerts } from '../../contexts/AlertContext';
-import { Category, useCategories } from '../../contexts/CategoryContext';
+import { Category, useCategoryActions } from '../../services/categoryActions';
 
 interface CategoryFormProps {
 	open: boolean;
@@ -18,7 +18,7 @@ interface CategoryFormProps {
 }
 
 const CategoryForm = ({ open, handleClose, category, space, parent, anchorEl }: CategoryFormProps) => {
-	const { addCategory, updateCategory, loading } = useCategories();
+	const { addCategory, updateCategory, categoryLoading } = useCategoryActions();
 	const [name, setName] = useState(category ? category.name : '');
 	const [color, setColor] = useState<string | undefined>(category ? category.color ?? undefined : undefined);
 	const [icon, setIcon] = useState<string | undefined>(category ? category.icon ?? undefined : undefined);
@@ -150,7 +150,7 @@ const CategoryForm = ({ open, handleClose, category, space, parent, anchorEl }: 
 						</Button>
 						<Button
 							type="submit"
-							loading={loading}
+							loading={categoryLoading}
 							loadingPosition="end"
 							startIcon={<SaveIcon />}
 						>

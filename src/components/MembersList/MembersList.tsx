@@ -1,12 +1,12 @@
 import { Box, IconButton, Stack, useTheme } from '@mui/material';
 import * as MuiIcons from '@mui/icons-material';
 import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
-import { Member, useMembers } from '../../contexts/MemberContext';
+import { Member, useMemberActions } from '../../services/memberActions';
 import { getContrastColor } from '../../utilities';
 import { ReactSVG } from 'react-svg';
 import { useState } from 'react';
 import MemberForm from './MemberForm';
-import { Space } from '../../contexts/SpaceContext';
+import { Space } from '../../services/spaceActions';
 import '../../styles/components/MembersList.scss';
 
 interface MembersListProps {
@@ -14,7 +14,7 @@ interface MembersListProps {
 }
 
 const MembersList = ({ space }: MembersListProps) => {
-	const { members, deleteMember } = useMembers();
+	const { members, deleteMember } = useMemberActions();
 	const [selectedMember, setSelectedMember] = useState<null | Member>(null);
 
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

@@ -15,12 +15,12 @@ import {
 	Delete as DeleteIcon,
 	Edit as EditIcon,
 } from '@mui/icons-material';
-import { Category, useCategories } from '../../contexts/CategoryContext';
+import { Category, useCategoryActions } from '../../services/categoryActions';
 import { ReactSVG } from 'react-svg';
 import React, { useMemo, useState } from 'react';
 import { PopoverVirtualElement, TableFooter } from '@mui/material';
 import CategoryForm from './CategoryForm';
-import { Space } from '../../contexts/SpaceContext';
+import { Space } from '../../services/spaceActions';
 
 interface CategoriesListProps {
 	space?: Space;
@@ -33,7 +33,7 @@ interface CategoryTreeItem extends Category {
 type CategoryTreeItems = CategoryTreeItem[];
 
 export default function CategoriesList({ space }: CategoriesListProps) {
-	const { categories, deleteCategory } = useCategories();
+	const { categories, deleteCategory } = useCategoryActions();
 	const [selectedCategory, setSelectedCategory] = useState<null | CategoryTreeItem>(null);
 	const [parent, setParent] = useState<null | Category | undefined>(undefined);
 	const [anchorEl, setAnchorEl] = useState<null | PopoverVirtualElement>(null);

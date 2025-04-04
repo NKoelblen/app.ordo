@@ -37,7 +37,7 @@ import { getProjection, flattenTree, removeChildrenOf } from './utilities';
 import { CollapseButton } from '../CollapseButton';
 import '../../styles/components/TreeItem.scss';
 
-import { useSpaces, Space } from '../../contexts/SpaceContext';
+import { Space, useSpaceActions } from '../../services/spaceActions';
 import SpaceForm from './SpaceForm';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAlerts } from '../../contexts/AlertContext';
@@ -45,7 +45,7 @@ import { ReactSVG } from 'react-svg';
 import GlobalSettingsModal from '../GlobalSettingsModal';
 
 const SpacesTree = () => {
-	const { spaces, setStatusFilter, updateSpace, deleteSpace, loading } = useSpaces();
+	const { spaces, setStatusFilter, updateSpace, deleteSpace, spaceLoading } = useSpaceActions();
 	const [showArchived, setShowArchived] = useState(false);
 	const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
 	const [parentSpace, setParentSpace] = useState<Space | null>(null);
@@ -621,7 +621,7 @@ const SpacesTree = () => {
 				</SortableContext>
 			</DndContext>
 
-			{loading && spaces.length === 0 && <CircularProgress className="loading" />}
+			{spaceLoading && spaces.length === 0 && <CircularProgress className="loading" />}
 
 			<SpaceForm
 				open={spaceModalOpen}

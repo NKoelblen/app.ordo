@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Box, TextField, Button, Typography, Stack, Popover } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
-import { Space } from '../../contexts/SpaceContext';
+import { Space } from '../../services/spaceActions';
 import ColorPicker from '../Forms/ColorPicker';
 import IconPicker from '../Forms/IconPicker';
 import '../../styles/components/SpaceForm.scss';
 import { useAlerts } from '../../contexts/AlertContext';
-import { Member, useMembers } from '../../contexts/MemberContext';
+import { Member, useMemberActions } from '../../services/memberActions';
 
 interface MemberFormProps {
 	open: boolean;
@@ -17,7 +17,7 @@ interface MemberFormProps {
 }
 
 const MemberForm = ({ open, handleClose, member, space, anchorEl }: MemberFormProps) => {
-	const { addMember, updateMember, loading } = useMembers();
+	const { addMember, updateMember, memberLoading } = useMemberActions();
 	const [name, setName] = useState(member ? member.name : '');
 	const [color, setColor] = useState<string | undefined>(member ? member.color ?? undefined : undefined);
 	const [icon, setIcon] = useState<string | undefined>(member ? member.icon ?? undefined : undefined);
@@ -146,7 +146,7 @@ const MemberForm = ({ open, handleClose, member, space, anchorEl }: MemberFormPr
 						</Button>
 						<Button
 							type="submit"
-							loading={loading}
+							loading={memberLoading}
 							loadingPosition="end"
 							startIcon={<SaveIcon />}
 						>

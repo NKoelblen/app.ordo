@@ -1,10 +1,10 @@
-import { createContext, useState, useContext, useEffect } from 'react';
-import { useMutation, MutationFunctionOptions, OperationVariables, DefaultContext, ApolloCache, FetchResult, useQuery } from '@apollo/client';
+import { useState, useEffect } from 'react';
+import { useMutation, useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
-import { useAlerts } from './AlertContext';
-import { Space } from './SpaceContext';
+import { useAlerts } from '../contexts/AlertContext';
+import { Space } from './spaceActions';
 
-// Définition du type Space
+// Définition du type Category
 export interface Category {
 	id: string;
 	name: string;
@@ -15,22 +15,9 @@ export interface Category {
 	parent?: Category | null;
 }
 
-// Type du contexte
-interface CategoryContextType {
-	categories: Category[];
-	addCategory: (options?: MutationFunctionOptions<any, OperationVariables, DefaultContext, ApolloCache<any>> | undefined) => Promise<FetchResult<any>>;
-	updateCategory: (options?: MutationFunctionOptions<any, OperationVariables, DefaultContext, ApolloCache<any>> | undefined) => Promise<FetchResult<any>>;
-	deleteCategory: (options?: MutationFunctionOptions<any, OperationVariables, DefaultContext, ApolloCache<any>> | undefined) => Promise<FetchResult<any>>;
-	loading: boolean;
-}
-
-// Création du contexte
-const CategoryContext = createContext<CategoryContextType | undefined>(undefined);
-
-// Provider du contexte
-export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const useCategoryActions = () => {
 	const [categories, setCategories] = useState<Category[]>([]);
-	const [loading, setLoading] = useState<boolean>(false);
+	const [categoryLoading, setCategoryLoading] = useState<boolean>(false);
 	const { showAlert } = useAlerts();
 
 	const CATEGORY_FIELDS = gql`
@@ -72,10 +59,10 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 	});
 	useEffect(() => {
 		if (categoriesLoading) {
-			setLoading(true);
+			setCategoryLoading(true);
 		}
 		if (categoriesData || categoriesError) {
-			setLoading(false);
+			setCategoryLoading(false);
 		}
 		if (categoriesData) {
 			setCategories(categoriesData.categories.edges.map((edge: { node: Category }) => edge.node));
@@ -104,10 +91,10 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 	});
 	useEffect(() => {
 		if (addCategoryLoaging) {
-			setLoading(true);
+			setCategoryLoading(true);
 		}
 		if (addCategoryData || addCategoryError) {
-			setLoading(false);
+			setCategoryLoading(false);
 		}
 		if (addCategoryData) {
 			showAlert({ severity: 'success', message: 'La catégorie a bien été ajouté.', date: Date.now().toString() });
@@ -135,10 +122,10 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 	});
 	useEffect(() => {
 		if (updateCategoryLoaging) {
-			setLoading(true);
+			setCategoryLoading(true);
 		}
 		if (updateCategoryData || updateCategoryError) {
-			setLoading(false);
+			setCategoryLoading(false);
 		}
 	}, [updateCategoryLoaging, updateCategoryData, updateCategoryError]);
 
@@ -157,10 +144,10 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 	});
 	useEffect(() => {
 		if (deleteCategoryLoaging) {
-			setLoading(true);
+			setCategoryLoading(true);
 		}
 		if (deleteCategoryData || deleteCategoryError) {
-			setLoading(false);
+			setCategoryLoading(false);
 		}
 		if (deleteCategoryData) {
 			showAlert({ severity: 'success', message: 'La catégorie a bien été supprimé.', date: Date.now().toString() });
@@ -170,14 +157,5 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 		}
 	}, [deleteCategoryLoaging, deleteCategoryData, deleteCategoryError]);
 
-	return <CategoryContext.Provider value={{ categories, addCategory, updateCategory, deleteCategory, loading }}>{children}</CategoryContext.Provider>;
-};
-
-// Hook pour utiliser le contexte
-export const useCategories = (): CategoryContextType => {
-	const context = useContext(CategoryContext);
-	if (!context) {
-		throw new Error("useCategories doit être utilisé à l'intérieur d'un CategoryProvider");
-	}
-	return context;
+	return { categories, addCategory, updateCategory, deleteCategory, categoryLoading };
 };

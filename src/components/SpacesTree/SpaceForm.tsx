@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Modal, Box, TextField, Button, Typography, Fade, Backdrop, FormControlLabel, Checkbox, Stack } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
-import { useSpaces } from '../../contexts/SpaceContext';
-import { Space } from '../../contexts/SpaceContext';
+import { Space, useSpaceActions } from '../../services/spaceActions';
 import ColorPicker from '../Forms/ColorPicker';
 import IconPicker from '../Forms/IconPicker';
 import '../../styles/components/SpaceForm.scss';
@@ -17,7 +16,7 @@ interface SpaceFormProps {
 }
 
 const SpaceForm = ({ open, handleClose, space, parentSpace }: SpaceFormProps) => {
-	const { addSpace, updateSpace, loading } = useSpaces();
+	const { addSpace, updateSpace, spaceLoading } = useSpaceActions();
 	const [name, setName] = useState(space ? space.name : '');
 	const [professional, setProfessional] = useState(space ? space.professional : false);
 	const [color, setColor] = useState<string | undefined>(space ? space.color ?? undefined : undefined);
@@ -164,7 +163,7 @@ const SpaceForm = ({ open, handleClose, space, parentSpace }: SpaceFormProps) =>
 							</Button>
 							<Button
 								type="submit"
-								loading={loading}
+								loading={spaceLoading}
 								loadingPosition="end"
 								startIcon={<SaveIcon />}
 							>
